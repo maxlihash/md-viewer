@@ -1,12 +1,12 @@
 // MD Viewer — service worker (offline cache)
-const CACHE = 'md-viewer-v1';
+const CACHE = 'md-viewer-v2';
 const ASSETS = [
   '/',
   '/index.html',
   '/assets/styles.css',
   '/assets/app.js',
-  '/about.html',
-  '/privacy.html',
+  '/about',
+  '/privacy',
   '/manifest.json',
 ];
 

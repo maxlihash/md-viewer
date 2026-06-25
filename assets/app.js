@@ -1,5 +1,5 @@
-// md-viewer — core app logic
-// Pure client-side: local file loading, URL fetching, markdown rendering, export
+// MD 阅读器 — 核心逻辑
+// 纯前端：本地文件读取、链接导入、Markdown 渲染、导出、添加到桌面
 
 const dropzone = document.getElementById('dropzone');
 const fileInput = document.getElementById('fileInput');
@@ -42,17 +42,17 @@ fileInput.addEventListener('change', () => {
 
 function loadFile(file) {
   if (!file.name.match(/\.(md|markdown|txt)$/i)) {
-    showStatus('⚠️ Not a markdown file. Try a .md or .markdown file.', 'warning');
+    showStatus('⚠️ 不是 Markdown 文件，请选择 .md / .markdown / .txt 文件。', 'warning');
     return;
   }
   currentFileName = file.name;
-  showStatus('Reading file…', '');
+  showStatus('正在读取…', '');
   const reader = new FileReader();
   reader.onload = () => {
     render(reader.result, file.name);
-    showStatus('✅ Rendered from local file — nothing uploaded.', 'ok');
+    showStatus('✅ 已在本地打开，文件未上传。', 'ok');
   };
-  reader.onerror = () => showStatus('❌ Failed to read file.', 'error');
+  reader.onerror = () => showStatus('❌ 文件读取失败。', 'error');
   reader.readAsText(file);
 }
 
@@ -62,10 +62,10 @@ urlInput.addEventListener('keydown', e => { if (e.key === 'Enter') loadFromURL()
 
 async function loadFromURL() {
   const url = urlInput.value.trim();
-  if (!url) { showStatus('Paste a URL first.', 'warning'); return; }
-  if (!url.startsWith('http')) { showStatus('URL must start with http:// or https://', 'warning'); return; }
+  if (!url) { showStatus('请先粘贴一个链接。', 'warning'); return; }
+  if (!url.startsWith('http')) { showStatus('链接需以 http:// 或 https:// 开头。', 'warning'); return; }
 
-  showStatus('Fetching…', '');
+  showStatus('正在导入…', '');
   try {
     const resp = await fetch(url);
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
@@ -73,9 +73,9 @@ async function loadFromURL() {
     const name = url.split('/').pop() || 'markdown';
     currentFileName = name;
     render(text, name);
-    showStatus('✅ Rendered from URL.', 'ok');
+    showStatus('✅ 已从链接导入。', 'ok');
   } catch (err) {
-    showStatus(`❌ Failed: ${err.message}. Make sure it's a raw GitHub URL (raw.githubusercontent.com/…).`, 'error');
+    showStatus(`❌ 导入失败：${err.message}。请确认是 Markdown 直链（如 raw.githubusercontent.com/…），或下载到本地再打开。`, 'error');
   }
 }
 
@@ -83,7 +83,7 @@ async function loadFromURL() {
 function render(raw, fileName) {
   currentRaw = raw;
   if (!raw.trim()) {
-    mdBody.innerHTML = '<p style="color:var(--muted)">(empty file)</p>';
+    mdBody.innerHTML = '<p style="color:var(--muted)">（空文件）</p>';
     mdRaw.textContent = '';
   } else {
     const html = typeof marked !== 'undefined' ? marked.parse(raw) : `<pre>${escapeHtml(raw)}</pre>`;
@@ -95,14 +95,14 @@ function render(raw, fileName) {
   mdRaw.style.display = 'none';
   tbTitle.textContent = fileName || '—';
   viewer.style.display = 'block';
-  document.getElementById('btnRaw').innerHTML = '&#x3c;&#x3e; Source';
+  document.getElementById('btnRaw').textContent = '查看源码';
   viewer.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 // ——— Toolbar actions ———
 document.getElementById('btnDownload').addEventListener('click', () => {
   const html = mdBody.innerHTML;
-  const full = `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHtml(currentFileName)}</title><style>body{max-width:860px;margin:40px auto;padding:0 20px;font:16px/1.65 -apple-system,BlinkMacSystemFont,sans-serif;color:#e6edf3;background:#0d1117;}pre{background:#161b22;padding:16px;border-radius:8px;overflow-x:auto}code{font-size:.88em}img{max-width:100%}blockquote{border-left:3px solid #58a6ff;padding:4px 16px;color:#8b949e}a{color:#58a6ff}table{border-collapse:collapse}td,th{border:1px solid #30363d;padding:8px 12px}</style></head><body>${html}</body></html>`;
+  const full = `<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHtml(currentFileName)}</title><style>body{max-width:820px;margin:40px auto;padding:0 20px;font:16px/1.7 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;color:#1f2329;background:#fff;}pre{background:#f2f3f5;padding:16px;border-radius:8px;overflow-x:auto}code{font-size:.88em;background:#f2f3f5;padding:1px 5px;border-radius:4px}pre code{background:none;padding:0}img{max-width:100%}blockquote{border-left:3px solid #3370ff;padding:4px 16px;color:#646a73;margin:14px 0}a{color:#3370ff}table{border-collapse:collapse}td,th{border:1px solid #e5e6eb;padding:8px 12px}</style></head><body>${html}</body></html>`;
   downloadBlob(full, currentFileName.replace(/\.(md|markdown|txt)$/i, '') + '.html', 'text/html');
 });
 
@@ -114,11 +114,11 @@ document.getElementById('btnCopy').addEventListener('click', async () => {
     await navigator.clipboard.write([
       new ClipboardItem({ 'text/html': new Blob([html], { type: 'text/html' }), 'text/plain': new Blob([currentRaw], { type: 'text/plain' }) })
     ]);
-    showStatus('📋 Copied (HTML + plain text).', 'ok');
+    showStatus('📋 已复制（带格式，可直接粘贴到微信/飞书/Word）。', 'ok');
   } catch {
-    // fallback
+    // 降级：纯文本
     await navigator.clipboard.writeText(currentRaw);
-    showStatus('📋 Copied as plain text.', 'ok');
+    showStatus('📋 已复制为纯文本。', 'ok');
   }
 });
 
@@ -127,18 +127,18 @@ document.getElementById('btnRaw').addEventListener('click', () => {
   if (showingRaw) {
     mdBody.style.display = 'none';
     mdRaw.style.display = 'block';
-    document.getElementById('btnRaw').textContent = '👁️ Rendered';
+    document.getElementById('btnRaw').textContent = '查看排版';
   } else {
     mdBody.style.display = 'block';
     mdRaw.style.display = 'none';
-    document.getElementById('btnRaw').innerHTML = '&#x3c;&#x3e; Source';
+    document.getElementById('btnRaw').textContent = '查看源码';
   }
 });
 
 // ——— Helpers ———
 function showStatus(msg, cls) {
   statusEl.textContent = msg;
-  statusEl.style.color = cls === 'error' ? '#f85149' : cls === 'warning' ? '#d29922' : cls === 'ok' ? '#7ee787' : 'var(--muted)';
+  statusEl.style.color = cls === 'error' ? '#d92020' : cls === 'warning' ? '#b25e00' : cls === 'ok' ? '#1a7f37' : 'var(--muted)';
 }
 
 function downloadBlob(content, filename, mime) {
@@ -169,49 +169,78 @@ document.addEventListener('paste', e => {
   }
 });
 
-// ——— Demo content if opened with ?demo ———
+// ——— 添加到桌面（PWA 安装）———
+const installBtn = document.getElementById('installBtn');
+let deferredPrompt = null;
+
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  if (installBtn) installBtn.hidden = false;
+});
+
+if (installBtn) {
+  installBtn.addEventListener('click', async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') installBtn.hidden = true;
+      deferredPrompt = null;
+    } else {
+      // 浏览器未触发安装提示（如 iOS Safari）：跳转到图文步骤
+      location.href = '/about#desktop';
+    }
+  });
+}
+
+window.addEventListener('appinstalled', () => {
+  if (installBtn) installBtn.hidden = true;
+  showStatus('✅ 已添加到桌面，下次从桌面图标直接打开。', 'ok');
+});
+
+// ——— 打开 ?demo 时载入示例 ———
 if (new URLSearchParams(location.search).has('demo')) {
-  const demo = `# Markdown Demo
+  const demo = `# Markdown 示例
 
-## Welcome to MD Viewer 🎉
+## 欢迎使用 MD 阅读器 🎉
 
-This is a **live preview** of GitHub-Flavored Markdown.
+下面是 **GitHub 风格 Markdown** 的实时预览效果。
 
-### Features
+### 它能做什么
 
-- 🚀 Instant rendering
-- 🔒 100% private — no upload
-- 📱 Mobile-friendly
-- 🌙 Dark mode
+- 🚀 即点即看，秒出排版
+- 🔒 全程本地，文件不上传
+- 📱 手机、平板、电脑都能用
+- 📲 可添加到桌面当 App 用
 
-### Code Block
+### 代码块
 
 \`\`\`javascript
 function greet(name) {
-  return \`Hello, \${name}!\`;
+  return \`你好，\${name}！\`;
 }
-console.log(greet('HarmonyOS'));
+console.log(greet('鸿蒙'));
 \`\`\`
 
-### Table
+### 表格
 
-| Feature    | Supported |
-|------------|-----------|
-| Tables     | ✅        |
-| Task lists | ✅        |
-| Strikethrough | ~~yes~~ ✅ |
-| Code blocks | ✅       |
+| 功能       | 支持 |
+|------------|------|
+| 表格       | ✅   |
+| 任务清单   | ✅   |
+| 删除线     | ~~有~~ ✅ |
+| 代码块     | ✅   |
 
-### Task List
+### 任务清单
 
-- [x] Drop a .md file
-- [x] Paste a GitHub URL
-- [ ] ~~Upload to server~~ (never!)
+- [x] 打开本地 .md 文件
+- [x] 粘贴链接导入
+- [ ] ~~上传到服务器~~（永远不会）
 
-> **Tip:** Install this page as a PWA — tap browser menu → "Add to Home Screen".
+> **提示：** 点右上角「＋ 添加到桌面」，或看[添加步骤](/about#desktop)，就能像 App 一样从桌面打开。
 
-[GitHub-Flavored Markdown Spec](https://github.github.com/gfm/)
+[GitHub 风格 Markdown 规范](https://github.github.com/gfm/)
 `;
-  render(demo, 'demo.md');
-  showStatus('✅ Demo loaded. Drop your own .md file or paste a URL.', 'ok');
+  render(demo, '示例.md');
+  showStatus('✅ 示例已载入。把你自己的 .md 文件拖进来试试。', 'ok');
 }

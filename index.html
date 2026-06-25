@@ -2,18 +2,17 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
-  <title>MD Viewer — Free Online Markdown Viewer, Open .md Files in Browser</title>
-  <meta name="description" content="Open and preview .md Markdown files right in your browser. Supports local files, GitHub raw URLs. Free, instant, no upload, mobile-friendly. Works on HarmonyOS." />
-  <link rel="canonical" href="https://example.com/" />
+  <title>MD 阅读器 — 在线打开 Markdown 文件，免上传</title>
+  <meta name="description" content="在浏览器里直接打开、预览 .md / Markdown 文件。支持本地文件、链接导入，免登录、免上传、不联网也能用。可添加到桌面当 App 用。" />
+  <link rel="canonical" href="https://mdreader.xyz/" />
 
   <meta property="og:type" content="website" />
-  <meta property="og:title" content="MD Viewer — Online Markdown Preview, No Upload" />
-  <meta property="og:description" content="Drop a .md file or paste a URL — see it rendered instantly in your browser. Free, private, mobile-optimized." />
-  <meta property="og:image" content="https://example.com/assets/og.png" />
-  <meta property="og:url" content="https://example.com/" />
-  <meta name="twitter:card" content="summary_large_image" />
+  <meta property="og:title" content="MD 阅读器 — 在线打开 Markdown 文件" />
+  <meta property="og:description" content="拖入 .md 文件即可阅读，全程在本地，免上传。可添加到桌面当 App 用。" />
+  <meta property="og:url" content="https://mdreader.xyz/" />
+  <meta name="theme-color" content="#ffffff" />
 
   <link rel="manifest" href="/manifest.json" />
   <link rel="stylesheet" href="/assets/styles.css" />
@@ -22,149 +21,72 @@
   {
     "@context": "https://schema.org",
     "@type": "WebApplication",
-    "name": "MD Viewer",
-    "url": "https://example.com/",
-    "description": "Open and preview .md Markdown files in your browser. Free, no upload.",
+    "name": "MD 阅读器",
+    "url": "https://mdreader.xyz/",
+    "description": "在浏览器里打开、预览 Markdown 文件，免上传，可添加到桌面。",
     "applicationCategory": "Utility",
-    "operatingSystem": "HarmonyOS, Android, iOS, Web"
+    "operatingSystem": "HarmonyOS, Android, iOS, Windows, macOS, Web",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "CNY" }
   }
   </script>
 </head>
 <body>
   <header class="site">
     <div class="wrap">
-      <div class="logo">MD<span>·</span>Viewer</div>
+      <a href="/" class="logo">MD<span>·</span>阅读器</a>
       <nav>
-        <a href="/about.html">About</a>
-        <a href="#how">How to Use</a>
+        <button id="installBtn" class="btn ghost" hidden>＋ 添加到桌面</button>
+        <a href="/about">介绍</a>
       </nav>
     </div>
   </header>
 
   <main class="wrap">
-    <div class="hero">
-      <h1>Markdown Viewer — Open .md Files Online</h1>
-      <p class="sub">Drop a .md file or paste a URL. Rendered instantly in your browser. Free, private, mobile-friendly. No app needed — works on HarmonyOS, Android, iOS, desktop.</p>
+    <section class="hero">
+      <h1>Markdown 阅读器</h1>
+      <p class="sub">拖入 .md 文件就能看，自动排版成网页。全程在本地，不上传、不登录。</p>
 
-      <div class="badges">
-        <span class="badge">🔒 No upload</span>
-        <span class="badge">📱 Mobile ready</span>
-        <span class="badge">📂 Local files</span>
-        <span class="badge">🔗 GitHub URLs</span>
-        <span class="badge">🖨️ Export PDF</span>
-        <span class="badge">📲 Installable</span>
-      </div>
-
-      <!-- File drop zone -->
+      <!-- 文件拖放区 -->
       <div class="dropzone" id="dropzone">
-        <div class="big">Drop a .md file here</div>
-        <div class="small">or click to choose · nothing is uploaded</div>
+        <div class="big">点击选择，或把 .md 文件拖到这里</div>
+        <div class="small">支持 .md / .markdown / .txt · 文件不会离开你的设备</div>
         <input type="file" id="fileInput" accept=".md,.markdown,.txt,text/markdown,text/plain" />
       </div>
 
-      <!-- URL input -->
+      <!-- 链接导入 -->
       <div class="url-bar">
-        <input type="url" id="urlInput" placeholder="Or paste a GitHub raw URL → https://raw.githubusercontent.com/..." />
-        <button id="urlLoad" class="btn primary">Render</button>
+        <input type="url" id="urlInput" placeholder="或粘贴链接导入，如 https://raw.githubusercontent.com/..." />
+        <button id="urlLoad" class="btn primary">打开</button>
+      </div>
+
+      <div class="hero-links">
+        <a href="?demo">看个示例 →</a>
+        <span class="dot">·</span>
+        <a href="/about#desktop">怎么添加到桌面？</a>
       </div>
 
       <div id="status"></div>
-    </div>
+    </section>
 
-    <!-- Viewer area -->
-    <div class="viewer" id="viewer" style="display:none">
+    <!-- 阅读区 -->
+    <section class="viewer" id="viewer" style="display:none">
       <div class="toolbar" id="toolbar">
         <span class="tbar-title" id="tbTitle">—</span>
         <div class="tbar-actions">
-          <button class="btn small" id="btnDownload">↓ .html</button>
-          <button class="btn small" id="btnPrint">🖨️ PDF</button>
-          <button class="btn small" id="btnCopy">📋 Copy HTML</button>
-          <button class="btn small" id="btnRaw">&#x3c;&#x3e; Source</button>
+          <button class="btn small" id="btnRaw">查看源码</button>
+          <button class="btn small" id="btnCopy">复制</button>
+          <button class="btn small" id="btnPrint">导出 PDF</button>
+          <button class="btn small" id="btnDownload">存为网页</button>
         </div>
       </div>
       <article class="md-body" id="mdBody"></article>
       <pre class="md-raw" id="mdRaw" style="display:none"></pre>
-    </div>
+    </section>
   </main>
-
-  <section class="wrap how" id="how">
-    <h2>How to open .md files — 3 ways</h2>
-    <div class="steps">
-      <div class="step">
-        <div class="step-num">1</div>
-        <h3>Open local .md file</h3>
-        <p>Tap <strong>"Drop a .md file here"</strong> or click to pick any <code>.md</code> / <code>.markdown</code> file from your phone/PC. Rendered instantly — nothing uploaded to any server.</p>
-      </div>
-      <div class="step">
-        <div class="step-num">2</div>
-        <h3>Paste a GitHub raw URL</h3>
-        <p>Copy the raw URL of any README or markdown file on GitHub (<code>raw.githubusercontent.com/...</code>), paste it, tap <strong>Render</strong>.</p>
-      </div>
-      <div class="step">
-        <div class="step-num">3</div>
-        <h3>Install as PWA (HarmonyOS)</h3>
-        <p>Tap the browser menu → <strong>"Add to Home Screen"</strong>. MD Viewer becomes a standalone app — works offline, opens from your home screen like a native app.</p>
-      </div>
-    </div>
-  </section>
-
-  <section class="wrap features" id="features">
-    <h2>Why MD Viewer</h2>
-    <div class="grid-3">
-      <div class="card">
-        <h3>🔒 100% Private</h3>
-        <p>Everything runs in your browser. Your files never leave your device — no server, no upload, no tracking.</p>
-      </div>
-      <div class="card">
-        <h3>📱 HarmonyOS Ready</h3>
-        <p>Tested on HarmonyOS browser. Install as PWA for a near-native experience with offline support.</p>
-      </div>
-      <div class="card">
-        <h3>🎨 GitHub-Flavored</h3>
-        <p>Supports GFM: tables, task lists, strikethrough, code blocks with syntax highlighting. Renders just like GitHub.</p>
-      </div>
-      <div class="card">
-        <h3>🖨️ Export to PDF</h3>
-        <p>Print directly to PDF from your browser. Clean typography, ready to share or archive.</p>
-      </div>
-      <div class="card">
-        <h3>🌙 Dark Mode</h3>
-        <p>Easy on the eyes. Code blocks and tables are tuned for dark backgrounds.</p>
-      </div>
-      <div class="card">
-        <h3>⚡ Instant</h3>
-        <p>No loading spinners. No backend. Pure client-side rendering — drop → rendered.</p>
-      </div>
-    </div>
-  </section>
-
-  <section class="wrap faq" id="faq">
-    <h2>FAQ</h2>
-    <details>
-      <summary>Does HarmonyOS support PWA installation?</summary>
-      <p>Yes. HarmonyOS 4.0+ browsers support "Add to Home Screen" for PWAs. MD Viewer includes a manifest and service worker for offline use.</p>
-    </details>
-    <details>
-      <summary>Are my files uploaded anywhere?</summary>
-      <p>No. All processing happens in your browser via the File API and <code>marked.js</code>. Nothing is sent to any server. You can verify by opening DevTools → Network tab — zero requests after page load.</p>
-    </details>
-    <details>
-      <summary>What Markdown features are supported?</summary>
-      <p>Full GitHub-Flavored Markdown (GFM): headings, lists, tables, task lists, strikethrough, code blocks with language detection, blockquotes, links, images, and inline HTML.</p>
-    </details>
-    <details>
-      <summary>Can I use it offline?</summary>
-      <p>Yes — after the first visit, the service worker caches the app. Open a local .md file anytime, even without internet.</p>
-    </details>
-    <details>
-      <summary>How is this different from opening .md as plain text?</summary>
-      <p>Your phone's text viewer shows raw markdown syntax (<code># Title</code>, <code>**bold**</code>). MD Viewer renders it into properly formatted HTML — headings, bold text, tables, code blocks — exactly how GitHub or Notion would display it.</p>
-    </details>
-  </section>
 
   <footer class="site">
     <div class="wrap">
-      <p>MD Viewer — Free online Markdown viewer. No upload, no signup, no app install. | <a href="/privacy.html">Privacy</a> | <a href="/about.html">About</a></p>
+      <p>MD 阅读器 · 免费 · 不上传 · 可添加到桌面 — <a href="/about">详细介绍</a> · <a href="/privacy">隐私说明</a></p>
     </div>
   </footer>
 
