@@ -164,7 +164,7 @@ footer.site p { font-size: 13px; color: var(--muted); margin: 0; text-align: cen
   .tbar-actions .btn.small { padding: 4px 10px; font-size: 11px; }
   .url-bar { flex-direction: column; gap: 8px; padding: 8px; }
   .url-bar input { padding: 8px 10px; background: var(--panel); border-radius: 8px; }
-  .doc { padding: 20px 0; }
+  .doc { padding: 20px 16px; }
   .doc h1 { font-size: 22px; }
   .how-grid { grid-template-columns: 1fr; }
   footer.site { padding: 20px 0; }
