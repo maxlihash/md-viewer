@@ -25,8 +25,11 @@ self.addEventListener('activate', e => {
 
 // network-first: always try network, fall back to cache when offline
 self.addEventListener('fetch', e => {
-  // Only handle GET, skip chrome-extension etc.
+  const url = new URL(e.request.url);
+
+  // Only handle http/https GET requests
   if (e.request.method !== 'GET') return;
+  if (!url.protocol.startsWith('http')) return;
 
   e.respondWith((async () => {
     try {
