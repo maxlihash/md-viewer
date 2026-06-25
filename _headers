@@ -1,0 +1,22 @@
+# HTML: always revalidate
+/index.html
+  Cache-Control: no-cache
+
+/about.html
+  Cache-Control: no-cache
+
+/privacy.html
+  Cache-Control: no-cache
+
+/about
+  Cache-Control: no-cache
+
+/privacy
+  Cache-Control: no-cache
+
+/manifest.json
+  Cache-Control: no-cache
+
+# Assets: short cache (1h), CDN respects it
+/assets/*
+  Cache-Control: public, max-age=3600

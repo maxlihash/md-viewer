@@ -1,21 +1,46 @@
-// MD Viewer — service worker (offline cache)
-const CACHE = 'md-viewer-v2';
-const ASSETS = [
-  '/',
-  '/index.html',
-  '/assets/styles.css',
-  '/assets/app.js',
-  '/about',
-  '/privacy',
-  '/manifest.json',
-];
+// MD Viewer — service worker (offline cache, network-first for freshness)
+const CACHE = 'md-viewer-v3';
 
+// Bump ASSETS version when files change — or just let network-first handle it
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));
+  self.skipWaiting();
+  e.waitUntil(
+    caches.open(CACHE).then(c => c.addAll([
+      '/',
+      '/assets/styles.css',
+      '/assets/app.js',
+      '/manifest.json',
+    ]).catch(() => {}))
+  );
 });
 
-self.addEventListener('fetch', e => {
-  e.respondWith(
-    caches.match(e.request).then(r => r || fetch(e.request))
+self.addEventListener('activate', e => {
+  e.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+    )
   );
+  return self.clients.claim();
+});
+
+// network-first: always try network, fall back to cache when offline
+self.addEventListener('fetch', e => {
+  // Only handle GET, skip chrome-extension etc.
+  if (e.request.method !== 'GET') return;
+
+  e.respondWith((async () => {
+    try {
+      const netResp = await fetch(e.request);
+      // Cache successful responses
+      if (netResp.ok) {
+        const clone = netResp.clone();
+        caches.open(CACHE).then(c => c.put(e.request, clone));
+      }
+      return netResp;
+    } catch {
+      // Offline — serve from cache
+      const cached = await caches.match(e.request);
+      return cached || new Response('Offline', { status: 503 });
+    }
+  })());
 });
