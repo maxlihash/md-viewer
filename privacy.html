@@ -3,54 +3,56 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>隐私说明 — MD 阅读器</title>
-  <meta name="description" content="MD 阅读器隐私说明：不收集数据、不上传文件、无追踪。" />
+  <title data-i18n="privacy-title">隐私说明 — MD 阅读器</title>
+  <meta name="description" data-i18n="privacy-meta-desc" content="MD 阅读器隐私说明：不收集数据、不上传文件、无追踪。" />
   <link rel="canonical" href="https://mdreader.xyz/privacy" />
   <meta name="theme-color" content="#ffffff" />
   <link rel="icon" type="image/x-icon" href="/assets/favicon.ico" />
   <link rel="stylesheet" href="/assets/styles.css" />
+  <script src="/assets/i18n.js"></script>
 </head>
 <body>
   <header class="site">
     <div class="wrap">
-      <a href="/" class="logo">MD<span>·</span>阅读器</a>
+      <a href="/" class="logo" data-i18n="brand">MD<span>·</span>阅读器</a>
       <nav>
-        <a href="/">回到首页</a>
-        <a href="/about">介绍</a>
+        <button class="btn small" onclick="switchLang()" data-i18n="lang-label">EN</button>
+        <a href="/" data-i18n="about-nav-home">回到首页</a>
+        <a href="/about" data-i18n="about-nav-privacy">介绍</a>
       </nav>
     </div>
   </header>
 
   <main class="wrap doc">
-    <h1>隐私说明</h1>
-    <p class="lead">最后更新：2026 年 6 月 24 日</p>
+    <h1 data-i18n="privacy-h1">隐私说明</h1>
+    <p class="lead" data-i18n="privacy-updated">最后更新：2026 年 6 月 24 日</p>
 
-    <h2>一句话</h2>
-    <p><strong>我们什么都不收集。</strong>你的文件不会离开你的设备，没有统计、没有 Cookie、没有追踪。</p>
+    <h2 data-i18n="privacy-h2-tldr">一句话</h2>
+    <p data-i18n="privacy-tldr"><strong>我们什么都不收集。</strong>你的文件不会离开你的设备，没有统计、没有 Cookie、没有追踪。</p>
 
-    <h2>我们不做的事</h2>
+    <h2 data-i18n="privacy-h2-nope">我们不做的事</h2>
     <ul>
-      <li><strong>不上传文件</strong>：所有 Markdown 解析都在你的浏览器本地用 <code>marked.js</code> 完成，<code>.md</code> 文件始终留在你的设备上。</li>
-      <li><strong>不做统计</strong>：不用任何第三方统计或追踪像素。</li>
-      <li><strong>不用 Cookie</strong>：不设置任何 Cookie（仅有用于离线的 Service Worker 缓存，存在你本地）。</li>
-      <li><strong>不要个人信息</strong>：不需要姓名、邮箱或任何账号信息。</li>
+      <li data-i18n="privacy-nope1"><strong>不上传文件</strong>：所有 Markdown 解析都在你的浏览器本地用 <code>marked.js</code> 完成，<code>.md</code> 文件始终留在你的设备上。</li>
+      <li data-i18n="privacy-nope2"><strong>不做统计</strong>：不用任何第三方统计或追踪像素。</li>
+      <li data-i18n="privacy-nope3"><strong>不用 Cookie</strong>：不设置任何 Cookie（仅有用于离线的 Service Worker 缓存，存在你本地）。</li>
+      <li data-i18n="privacy-nope4"><strong>不要个人信息</strong>：不需要姓名、邮箱或任何账号信息。</li>
     </ul>
 
-    <h2>托管方可能记录的</h2>
-    <p>本站托管在 Cloudflare Pages，Cloudflare 作为基础设施可能记录匿名访问数据（如请求数、带宽），这是所有托管在 Cloudflare 上的网站的通用情况。详见 <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener">Cloudflare 隐私政策</a>。</p>
+    <h2 data-i18n="privacy-h2-host">托管方可能记录的</h2>
+    <p data-i18n="privacy-host">本站托管在 Cloudflare Pages，Cloudflare 作为基础设施可能记录匿名访问数据（如请求数、带宽），这是所有托管在 Cloudflare 上的网站的通用情况。详见 <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener">Cloudflare 隐私政策</a>。</p>
 
-    <h2>第三方 CDN</h2>
-    <p>本站从 jsDelivr（<code>cdn.jsdelivr.net</code>）加载 <code>marked.js</code>，jsDelivr 可能按其<a href="https://www.jsdelivr.com/terms/privacy-policy" target="_blank" rel="noopener">隐私政策</a>记录匿名请求数据。</p>
+    <h2 data-i18n="privacy-h2-cdn">第三方 CDN</h2>
+    <p data-i18n="privacy-cdn">本站从 jsDelivr（<code>cdn.jsdelivr.net</code>）加载 <code>marked.js</code>，jsDelivr 可能按其<a href="https://www.jsdelivr.com/terms/privacy-policy" target="_blank" rel="noopener">隐私政策</a>记录匿名请求数据。</p>
 
-    <h2>联系</h2>
-    <p>有问题可邮件 <a href="mailto:hello@mdreader.xyz">hello@mdreader.xyz</a>。</p>
+    <h2 data-i18n="privacy-h2-contact">联系</h2>
+    <p data-i18n="privacy-contact">有问题可邮件 <a href="mailto:hello@mdreader.xyz">hello@mdreader.xyz</a>。</p>
 
-    <p class="back"><a href="/">← 回首页</a></p>
+    <p class="back"><a href="/" data-i18n="privacy-back">← 回首页</a></p>
   </main>
 
   <footer class="site">
     <div class="wrap">
-      <p>MD 阅读器 · 免费 · 不上传 — <a href="/">首页</a> · <a href="/about">介绍</a></p>
+      <p data-i18n="privacy-footer">MD 阅读器 · 免费 · 不上传 — <a href="/">首页</a> · <a href="/about">介绍</a></p>
     </div>
   </footer>
 </body>

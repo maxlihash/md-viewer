@@ -42,17 +42,17 @@ fileInput.addEventListener('change', () => {
 
 function loadFile(file) {
   if (!file.name.match(/\.(md|markdown|txt)$/i)) {
-    showStatus('⚠️ 不是 Markdown 文件，请选择 .md / .markdown / .txt 文件。', 'warning');
+    showStatus(t('status-not-md'), 'warning');
     return;
   }
   currentFileName = file.name;
-  showStatus('正在读取…', '');
+  showStatus(t('status-reading'), '');
   const reader = new FileReader();
   reader.onload = () => {
     render(reader.result, file.name);
-    showStatus('✅ 已在本地打开，文件未上传。', 'ok');
+    showStatus(t('status-ok-local'), 'ok');
   };
-  reader.onerror = () => showStatus('❌ 文件读取失败。', 'error');
+  reader.onerror = () => showStatus(t('status-read-error'), 'error');
   reader.readAsText(file);
 }
 
@@ -62,10 +62,10 @@ urlInput.addEventListener('keydown', e => { if (e.key === 'Enter') loadFromURL()
 
 async function loadFromURL() {
   const url = urlInput.value.trim();
-  if (!url) { showStatus('请先粘贴一个链接。', 'warning'); return; }
-  if (!url.startsWith('http')) { showStatus('链接需以 http:// 或 https:// 开头。', 'warning'); return; }
+  if (!url) { showStatus(t('status-no-url'), 'warning'); return; }
+  if (!url.startsWith('http')) { showStatus(t('status-bad-url'), 'warning'); return; }
 
-  showStatus('正在导入…', '');
+  showStatus(t('status-fetching'), '');
   try {
     const resp = await fetch(url);
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
@@ -73,17 +73,17 @@ async function loadFromURL() {
     const name = url.split('/').pop() || 'markdown';
     currentFileName = name;
     render(text, name);
-    showStatus('✅ 已从链接导入。', 'ok');
+    showStatus(t('status-ok-url'), 'ok');
   } catch (err) {
-    showStatus(`❌ 导入失败：${err.message}。请确认是 Markdown 直链（如 raw.githubusercontent.com/…），或下载到本地再打开。`, 'error');
+    showStatus(t('status-fetch-error').replace('{0}', err.message), 'error');
   }
 }
 
 // ——— Render ———
-function render(raw, fileName) {
+window.render = function render(raw, fileName) {
   currentRaw = raw;
   if (!raw.trim()) {
-    mdBody.innerHTML = '<p style="color:var(--muted)">（空文件）</p>';
+    mdBody.innerHTML = '<p style="color:var(--muted)">' + t('empty-file') + '</p>';
     mdRaw.textContent = '';
   } else {
     const html = typeof marked !== 'undefined' ? marked.parse(raw) : `<pre>${escapeHtml(raw)}</pre>`;
@@ -95,8 +95,12 @@ function render(raw, fileName) {
   mdRaw.style.display = 'none';
   tbTitle.textContent = fileName || '—';
   viewer.style.display = 'block';
-  document.getElementById('btnRaw').textContent = '查看源码';
+  updateBtnLabels();
   viewer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+};
+
+function updateBtnLabels() {
+  document.getElementById('btnRaw').textContent = showingRaw ? t('toolbar-rendered') : t('toolbar-source');
 }
 
 // ——— Toolbar actions ———
@@ -114,11 +118,10 @@ document.getElementById('btnCopy').addEventListener('click', async () => {
     await navigator.clipboard.write([
       new ClipboardItem({ 'text/html': new Blob([html], { type: 'text/html' }), 'text/plain': new Blob([currentRaw], { type: 'text/plain' }) })
     ]);
-    showStatus('📋 已复制（带格式，可直接粘贴到微信/飞书/Word）。', 'ok');
+    showStatus(t('status-copied-rich'), 'ok');
   } catch {
-    // 降级：纯文本
     await navigator.clipboard.writeText(currentRaw);
-    showStatus('📋 已复制为纯文本。', 'ok');
+    showStatus(t('status-copied-plain'), 'ok');
   }
 });
 
@@ -127,12 +130,11 @@ document.getElementById('btnRaw').addEventListener('click', () => {
   if (showingRaw) {
     mdBody.style.display = 'none';
     mdRaw.style.display = 'block';
-    document.getElementById('btnRaw').textContent = '查看排版';
   } else {
     mdBody.style.display = 'block';
     mdRaw.style.display = 'none';
-    document.getElementById('btnRaw').textContent = '查看源码';
   }
+  updateBtnLabels();
 });
 
 // ——— Helpers ———
@@ -187,7 +189,6 @@ if (installBtn) {
       if (outcome === 'accepted') installBtn.hidden = true;
       deferredPrompt = null;
     } else {
-      // 浏览器未触发安装提示（如 iOS Safari）：跳转到图文步骤
       location.href = '/about#desktop';
     }
   });
@@ -195,52 +196,46 @@ if (installBtn) {
 
 window.addEventListener('appinstalled', () => {
   if (installBtn) installBtn.hidden = true;
-  showStatus('✅ 已添加到桌面，下次从桌面图标直接打开。', 'ok');
+  showStatus(t('install-done'), 'ok');
 });
 
 // ——— 打开 ?demo 时载入示例 ———
-if (new URLSearchParams(location.search).has('demo')) {
-  const demo = `# Markdown 示例
-
-## 欢迎使用 MD 阅读器 🎉
-
-下面是 **GitHub 风格 Markdown** 的实时预览效果。
-
-### 它能做什么
-
-- 🚀 即点即看，秒出排版
-- 🔒 全程本地，文件不上传
-- 📱 手机、平板、电脑都能用
-- 📲 可添加到桌面当 App 用
-
-### 代码块
-
-\`\`\`javascript
-function greet(name) {
-  return \`你好，\${name}！\`;
+function buildDemo() {
+  return '# ' + t('demo-h1') + '\n\n' +
+    '## ' + t('demo-h2') + '\n\n' +
+    t('demo-p') + '\n\n' +
+    '### ' + t('demo-h3-features') + '\n\n' +
+    '- ' + t('demo-li1') + '\n' +
+    '- ' + t('demo-li2') + '\n' +
+    '- ' + t('demo-li3') + '\n' +
+    '- ' + t('demo-li4') + '\n\n' +
+    '### ' + t('demo-h3-code') + '\n\n' +
+    '```javascript\nfunction greet(name) {\n  return `' + t('demo-code').replace('{0}', '${name}') + '`;\n}\n' +
+    'console.log(greet(\'World\'));\n```\n\n' +
+    '### ' + t('demo-h3-table') + '\n\n' +
+    '| ' + t('demo-th1') + ' | ' + t('demo-th2') + ' |\n' +
+    '|------|------|\n' +
+    '| ' + t('demo-td1') + ' | ✅ |\n' +
+    '| ' + t('demo-td2') + ' | ✅ |\n' +
+    '| ' + t('demo-td3') + ' | ' + t('demo-td4') + ' |\n' +
+    '| ' + t('demo-td5') + ' | ✅ |\n\n' +
+    '### ' + t('demo-h3-tasks') + '\n\n' +
+    '- [x] ' + t('demo-task1') + '\n' +
+    '- [x] ' + t('demo-task2') + '\n' +
+    '- [ ] ' + t('demo-task3') + '\n\n' +
+    '> **' + t('demo-tip') + '**\n\n' +
+    '[' + t('demo-link-gfm') + '](https://github.github.com/gfm/)\n';
 }
-console.log(greet('鸿蒙'));
-\`\`\`
 
-### 表格
-
-| 功能       | 支持 |
-|------------|------|
-| 表格       | ✅   |
-| 任务清单   | ✅   |
-| 删除线     | ~~有~~ ✅ |
-| 代码块     | ✅   |
-
-### 任务清单
-
-- [x] 打开本地 .md 文件
-- [x] 粘贴链接导入
-- [ ] ~~上传到服务器~~（永远不会）
-
-> **提示：** 点右上角「＋ 添加到桌面」，或看[添加步骤](/about#desktop)，就能像 App 一样从桌面打开。
-
-[GitHub 风格 Markdown 规范](https://github.github.com/gfm/)
-`;
-  render(demo, '示例.md');
-  showStatus('✅ 示例已载入。把你自己的 .md 文件拖进来试试。', 'ok');
+if (new URLSearchParams(location.search).has('demo')) {
+  // Wait for i18n to be ready, then render
+  function showDemo() {
+    render(buildDemo(), 'demo.md');
+    showStatus(t('status-demo'), 'ok');
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', showDemo);
+  } else {
+    showDemo();
+  }
 }
