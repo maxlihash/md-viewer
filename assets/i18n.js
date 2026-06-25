@@ -315,11 +315,22 @@ function t(key) {
 
 // Apply translations to DOM
 function initI18n() {
-  // Update all elements with data-i18n
   document.querySelectorAll('[data-i18n]').forEach(function(el) {
     var key = el.getAttribute('data-i18n');
     var text = t(key);
-    if (text) el.innerHTML = text;
+    if (!text) return;
+    // Handle inputs: translate placeholder
+    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+      el.setAttribute('placeholder', text);
+      return;
+    }
+    // Handle meta tags: translate content attribute
+    if (el.tagName === 'META') {
+      el.setAttribute('content', text);
+      return;
+    }
+    // Default: translate innerHTML
+    el.innerHTML = text;
   });
 
   // Update title and meta
