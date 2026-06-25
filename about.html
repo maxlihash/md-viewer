@@ -1,101 +1,110 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title data-i18n="about-title">介绍 — MD 阅读器</title>
-  <meta name="description" data-i18n="about-meta-desc" content="MD 阅读器是一个免上传、免登录的在线 Markdown 阅读工具，可添加到桌面当 App 用。这里有功能说明、添加到桌面的步骤、常见问题。" />
+  <title data-i18n="about-title">About — MD Reader</title>
+  <meta name="description" data-i18n="about-meta-desc" content="MD Reader is a free online Markdown reader — no upload, no login. Add to home screen as an app. Read about features, installation steps, and FAQ." />
   <link rel="canonical" href="https://mdreader.xyz/about" />
   <meta name="theme-color" content="#ffffff" />
   <link rel="icon" type="image/x-icon" href="/assets/favicon.ico" />
   <link rel="stylesheet" href="/assets/styles.css" />
   <script src="/assets/i18n.js"></script>
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-L1LTFNC3NN"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-L1LTFNC3NN');
+  </script>
 </head>
 <body>
   <header class="site">
     <div class="wrap">
-      <a href="/" class="logo" data-i18n="brand">MD<span>·</span>阅读器</a>
+      <a href="/" class="logo" data-i18n="brand">MD<span>·</span>Reader</a>
       <nav>
-        <button class="btn small" onclick="switchLang()" data-i18n="lang-label">EN</button>
-        <a href="/" data-i18n="about-nav-home">回到首页</a>
-        <a href="/privacy" data-i18n="about-nav-privacy">隐私说明</a>
+        <button class="btn small" onclick="switchLang()" data-i18n="lang-label">中文</button>
+        <a href="/" data-i18n="about-nav-home">Home</a>
+        <a href="/privacy" data-i18n="about-nav-privacy">Privacy</a>
       </nav>
     </div>
   </header>
 
   <main class="wrap doc">
-    <h1 data-i18n="about-h1">关于 MD 阅读器</h1>
-    <p class="lead" data-i18n="about-lead">做这个工具的原因很简单：手机上收到一个 <code>.md</code> 文件，想看一眼，不该还要专门装个 App、还要把文件传到别人服务器上。</p>
+    <h1 data-i18n="about-h1">About MD Reader</h1>
+    <p class="lead" data-i18n="about-lead">Built for a simple reason: you get sent a <code>.md</code> file on your phone, and you just want to read it — without installing an app or uploading it to someone else's server.</p>
 
-    <h2 data-i18n="about-h2-features">它能做什么</h2>
+    <h2 data-i18n="about-h2-features">What it does</h2>
     <ul>
-      <li data-i18n="about-f1"><strong>打开本地文件</strong>：点一下或拖进来，<code>.md</code> / <code>.markdown</code> / <code>.txt</code> 立刻排版成网页。</li>
-      <li data-i18n="about-f2"><strong>链接导入</strong>：粘贴一个 Markdown 文件的直链（如 GitHub raw 链接），点「打开」即可。</li>
-      <li data-i18n="about-f3"><strong>导出</strong>：可导出 PDF、存为网页文件、一键复制（带格式，能直接粘进微信/飞书/Word）。</li>
-      <li data-i18n="about-f4"><strong>源码切换</strong>：随时在「排版后」和「原始 Markdown」之间切换。</li>
-      <li data-i18n="about-f5"><strong>添加到桌面</strong>：像装 App 一样放到桌面，离线也能用。</li>
+      <li data-i18n="about-f1"><strong>Open local files</strong>: tap or drop a <code>.md</code> / <code>.markdown</code> / <code>.txt</code> file and see it rendered instantly.</li>
+      <li data-i18n="about-f2"><strong>Import from a URL</strong>: paste a raw Markdown link (e.g. a GitHub raw URL) and open it.</li>
+      <li data-i18n="about-f3"><strong>Export</strong>: save as PDF, download as .html, or copy as rich text to paste into Word, email, etc.</li>
+      <li data-i18n="about-f4"><strong>Toggle views</strong>: switch between rendered output and raw source anytime.</li>
+      <li data-i18n="about-f5"><strong>Install as an app</strong>: add to your home screen for offline access, just like a native app.</li>
     </ul>
 
-    <h2 id="desktop" data-i18n="about-h2-install">怎么添加到桌面</h2>
-    <p data-i18n="about-install-intro">添加后，桌面会多一个图标，点开就是这个工具，跟原生 App 一样，断网也能打开本地文件。各系统的步骤：</p>
+    <h2 id="desktop" data-i18n="about-h2-install">How to add to your home screen</h2>
+    <p data-i18n="about-install-intro">Once added, you will see an icon on your home screen. Tap it to open the reader — just like a native app, even offline. Instructions by platform:</p>
 
     <div class="how-grid">
       <div class="how-card">
-        <h3 data-i18n="about-install-harmonyos">🟢 鸿蒙 HarmonyOS</h3>
-        <p data-i18n="about-install-harmonyos-desc">浏览器打开本页 → 点底部/右上角菜单 → 选「<strong>添加到桌面</strong>」/「<strong>添加到主屏幕</strong>」→ 确认。</p>
+        <h3 data-i18n="about-install-harmonyos">🟢 HarmonyOS</h3>
+        <p data-i18n="about-install-harmonyos-desc">Open this page in your browser → tap the menu (bottom or top-right) → select "<strong>Add to home screen</strong>" → confirm.</p>
       </div>
       <div class="how-card">
-        <h3 data-i18n="about-install-android">🤖 安卓 Android</h3>
-        <p data-i18n="about-install-android-desc">用 Chrome / 自带浏览器打开 → 右上角菜单「⋮」→「<strong>添加到主屏幕</strong>」/「安装应用」→ 确认。</p>
+        <h3 data-i18n="about-install-android">🤖 Android</h3>
+        <p data-i18n="about-install-android-desc">Open in Chrome or your default browser → tap the menu "⋮" → "<strong>Add to Home Screen</strong>" / "Install app" → confirm.</p>
       </div>
       <div class="how-card">
         <h3 data-i18n="about-install-ios">🍎 iPhone / iPad</h3>
-        <p data-i18n="about-install-ios-desc">必须用 <strong>Safari</strong> 打开 → 点底部「分享」按钮（方框+箭头）→「<strong>添加到主屏幕</strong>」→ 添加。</p>
+        <p data-i18n="about-install-ios-desc">You must use <strong>Safari</strong>. Open this page → tap the Share button (box with arrow) → "<strong>Add to Home Screen</strong>" → Add.</p>
       </div>
       <div class="how-card">
-        <h3 data-i18n="about-install-desktop">💻 电脑 Windows / Mac</h3>
-        <p data-i18n="about-install-desktop-desc">用 Chrome / Edge 打开 → 地址栏右侧的「安装」图标（屏幕带下箭头）→ 安装。也可在浏览器菜单里找「安装此应用」。</p>
+        <h3 data-i18n="about-install-desktop">💻 Windows / Mac</h3>
+        <p data-i18n="about-install-desktop-desc">Open in Chrome or Edge → click the Install icon in the address bar (screen with down arrow) → Install. You can also find "Install this app" in the browser menu.</p>
       </div>
     </div>
-    <p class="tip" data-i18n="about-install-tip">💡 如果首页右上角出现了「＋ 添加到桌面」按钮，直接点它最省事。</p>
+    <p class="tip" data-i18n="about-install-tip">💡 If you see an "+ Add to Home Screen" button at the top of the homepage, just tap that.</p>
 
-    <h2 data-i18n="about-h2-privacy">为什么免上传更好</h2>
-    <p data-i18n="about-privacy-desc">所有解析、排版都在你自己的浏览器里完成，文件不会发到任何服务器。这意味着：更快（没有上传等待）、更私密（公司文档、合同、笔记不外泄）、断网也能用。打开浏览器的开发者工具看网络请求就能验证——页面加载完之后，看文件不会再产生任何上传请求。</p>
+    <h2 data-i18n="about-h2-privacy">Why no-upload matters</h2>
+    <p data-i18n="about-privacy-desc">All parsing and rendering happens right in your browser. Your files are never sent to any server. This means: faster (no upload wait), more private (contracts, notes, documents stay on your device), and works offline. You can verify this — open browser DevTools and check the Network tab: after the page loads, there are zero upload requests.</p>
 
-    <h2 data-i18n="about-h2-syntax">支持哪些 Markdown 语法</h2>
-    <p data-i18n="about-syntax-desc">完整支持 GitHub 风格 Markdown（GFM）：标题、列表、表格、任务清单、删除线、引用、链接、图片、代码块（带语言识别）、行内 HTML。排版效果和 GitHub、Notion 上看到的基本一致。</p>
+    <h2 data-i18n="about-h2-syntax">Supported Markdown syntax</h2>
+    <p data-i18n="about-syntax-desc">Full GitHub-Flavored Markdown (GFM) support: headings, lists, tables, task lists, strikethrough, blockquotes, links, images, fenced code blocks with language detection, and inline HTML. Renders just like GitHub or Notion.</p>
 
-    <h2 data-i18n="about-h2-faq">常见问题</h2>
+    <h2 data-i18n="about-h2-faq">FAQ</h2>
     <details>
-      <summary data-i18n="about-faq-q1">我的文件会被上传吗？</summary>
-      <p data-i18n="about-faq-a1">不会。全部处理都在浏览器本地用 <code>marked.js</code> 完成，文件不发往任何服务器。</p>
+      <summary data-i18n="about-faq-q1">Are my files uploaded?</summary>
+      <p data-i18n="about-faq-a1">No. All processing is done locally in your browser with <code>marked.js</code>. Your files never leave your device.</p>
     </details>
     <details>
-      <summary data-i18n="about-faq-q2">断网能用吗？</summary>
-      <p data-i18n="about-faq-a2">能。第一次访问后会缓存到本地，之后离线也能打开本地 <code>.md</code> 文件。添加到桌面后体验更接近原生 App。</p>
+      <summary data-i18n="about-faq-q2">Does it work offline?</summary>
+      <p data-i18n="about-faq-a2">Yes. The first visit caches the app locally. After that you can open local <code>.md</code> files even without internet. Installing to your home screen gives the best offline experience.</p>
     </details>
     <details>
-      <summary data-i18n="about-faq-q3">和手机自带的「文本查看」有什么区别？</summary>
-      <p data-i18n="about-faq-a3">自带查看器显示的是原始符号（<code># 标题</code>、<code>**加粗**</code>），看着乱。这个工具会把它排版成真正的标题、加粗、表格、代码块，跟在 GitHub 上看一样。</p>
+      <summary data-i18n="about-faq-q3">How is this different from the built-in text viewer?</summary>
+      <p data-i18n="about-faq-a3">Your phone's text viewer shows raw markup (<code># Title</code>, <code>**bold**</code>) — hard to read. This tool renders it into proper headings, bold text, tables, and code blocks, just like you'd see on GitHub.</p>
     </details>
     <details>
-      <summary data-i18n="about-faq-q4">链接导入打不开 / 报错？</summary>
-      <p data-i18n="about-faq-a4">需要是 Markdown 文件的<strong>直链（raw）</strong>，比如 <code>raw.githubusercontent.com/...</code>，不是网页地址。部分站点限制跨域访问也会失败，这种情况把文件下载到本地再打开即可。</p>
+      <summary data-i18n="about-faq-q4">Why does URL import fail?</summary>
+      <p data-i18n="about-faq-a4">You need to use a <strong>raw</strong> Markdown URL, e.g. <code>raw.githubusercontent.com/…</code>, not a regular web page. Some sites block cross-origin requests — if that happens, download the file and open it locally.</p>
     </details>
     <details>
-      <summary data-i18n="about-faq-q5">收费吗？要登录吗？</summary>
-      <p data-i18n="about-faq-a5">完全免费，不用登录、不用注册，没有任何账号体系。</p>
+      <summary data-i18n="about-faq-q5">Is it free? Do I need an account?</summary>
+      <p data-i18n="about-faq-a5">Completely free. No login, no signup, no account system at all.</p>
     </details>
 
-    <h2 data-i18n="about-h2-tech">技术说明</h2>
-    <p data-i18n="about-tech-desc">纯静态页面，前端 HTML + CSS + 原生 JS，没有后端、没有数据库、没有打包步骤。Markdown 解析用 <a href="https://github.com/markedjs/marked" target="_blank" rel="noopener">marked.js</a>，本地文件读取用浏览器 File API，离线用 Service Worker 缓存，添加到桌面靠 Web App Manifest（PWA）。无埋点、无第三方统计。</p>
+    <h2 data-i18n="about-h2-tech">Tech</h2>
+    <p data-i18n="about-tech-desc">Static site — HTML + CSS + vanilla JS, no backend, no database, no build step. Markdown parsing by <a href="https://github.com/markedjs/marked" target="_blank" rel="noopener">marked.js</a>. Local file reading via the browser File API. Offline support via Service Worker. Installation via Web App Manifest (PWA). No tracking, no third-party analytics.</p>
 
-    <p class="back"><a href="/" data-i18n="about-back">← 回首页打开文件</a></p>
+    <p class="back"><a href="/" data-i18n="about-back">← Back to reader</a></p>
   </main>
 
   <footer class="site">
     <div class="wrap">
-      <p data-i18n="about-footer">MD 阅读器 · 免费 · 不上传 — <a href="/">首页</a> · <a href="/privacy">隐私说明</a></p>
+      <p data-i18n="about-footer">MD Reader · Free · No Upload — <a href="/">Home</a> · <a href="/privacy">Privacy</a></p>
     </div>
   </footer>
 </body>

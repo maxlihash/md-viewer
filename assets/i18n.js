@@ -293,7 +293,7 @@ window.I18N = {
   }
 };
 
-window._lang = 'zh-CN';
+window._lang = 'en';
 
 // Detect or load language preference
 (function initLang() {

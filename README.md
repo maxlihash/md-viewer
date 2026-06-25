@@ -1,46 +1,47 @@
-# MD 阅读器
+# MD Reader
 
-在线 Markdown 阅读工具 — 在浏览器里打开 .md 文件。免费、本地、不上传、可添加到桌面。
+Online Markdown reader — open .md files in your browser. Free, local, no upload, installable as a PWA.
 
-面向中国用户（鸿蒙 / 安卓 / iOS / 电脑全支持），PWA 可安装到桌面。
+Global-facing (English-first). Supports all platforms: iOS, Android, HarmonyOS, Windows, macOS.
 
-## 本地预览
+## Local preview
 
 ```bash
 python3 -m http.server 8080
-# 打开 http://localhost:8080
-# 加 ?demo 看示例内容
+# Open http://localhost:8080
+# Add ?demo for sample content
 ```
 
-## 功能
+## Features
 
-- 拖入本地 .md 文件 → 即时排版
-- 粘贴 Markdown 直链 → 导入渲染
-- 添加到桌面（PWA，支持离线）
-- 导出 PDF / 存为网页 / 一键复制（带格式）
-- 排版 ↔ 源码 切换
-- ⌘V / Ctrl+V 从剪贴板粘贴文件
-- 100% 前端，无后端
+- Drop local .md files → instant rendering
+- Paste a raw Markdown URL → import and render
+- Add to home screen (PWA, works offline)
+- Export: PDF / save as .html / copy with formatting
+- Toggle between rendered view and raw source
+- ⌘V / Ctrl+V to paste files from clipboard
+- 100% frontend, no backend
 
-## 页面分工
+## Pages
 
-- `index.html` — 极简工具页（首页只放工具）
-- `about.html` — 详细介绍 + 添加到桌面步骤 + 常见问题
-- `privacy.html` — 隐私说明
+- `index.html` — Minimal tool page (tool-first landing)
+- `about.html` — Detailed intro + install steps + FAQ
+- `privacy.html` — Privacy policy
 
-## 部署
+## Deploy
 
 ```bash
 ./set-domain.sh https://your-domain.com hello@your-domain.com
-# 部署到 Cloudflare Pages
+# Deploy to Cloudflare Pages
 ```
 
-## 文件
+## Files
 
-- `index.html` — 主应用（极简）
-- `assets/app.js` — 逻辑（文件/链接加载、marked.js 渲染、导出、添加到桌面）
-- `assets/styles.css` — 简洁浅色主题，移动优先，跟随系统夜间
+- `index.html` — Main app (minimal)
+- `assets/app.js` — Logic (file/URL loading, marked.js rendering, export, PWA install)
+- `assets/i18n.js` — zh-CN / en bilingual support (English default)
+- `assets/styles.css` — Clean light theme, mobile-first, follows system dark mode
 - `manifest.json` / `sw.js` — PWA
-- `about.html` / `privacy.html` — 静态页
+- `about.html` / `privacy.html` — Static pages
 - `robots.txt` / `sitemap.xml` — SEO
-- `set-domain.sh` — 域名占位替换
+- `set-domain.sh` — Domain placeholder replacement

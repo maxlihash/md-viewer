@@ -1,17 +1,22 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
-  <title data-i18n="page-title">MD 阅读器 — 在线打开 Markdown 文件，免上传</title>
-  <meta name="description" data-i18n="meta-desc" content="在浏览器里直接打开、预览 .md / Markdown 文件。支持本地文件、链接导入，免登录、免上传、不联网也能用。可添加到桌面当 App 用。" />
+  <title data-i18n="page-title">MD Reader — Open Markdown Files Online, No Upload</title>
+  <meta name="description" data-i18n="meta-desc" content="Open and preview .md Markdown files right in your browser. Supports local files and URL import. No login, no upload, works offline. Add to home screen as an app." />
   <link rel="canonical" href="https://mdreader.xyz/" />
 
   <meta property="og:type" content="website" />
-  <meta property="og:title" data-i18n="og-title" content="MD 阅读器 — 在线打开 Markdown 文件" />
-  <meta property="og:description" data-i18n="og-desc" content="拖入 .md 文件即可阅读，全程在本地，免上传。可添加到桌面当 App 用。" />
+  <meta property="og:title" data-i18n="og-title" content="MD Reader — Open Markdown Files Online" />
+  <meta property="og:description" data-i18n="og-desc" content="Drop a .md file and read it instantly. 100% local, no upload. Add to home screen." />
   <meta property="og:url" content="https://mdreader.xyz/" />
+  <meta property="og:image" content="https://mdreader.xyz/assets/og.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://mdreader.xyz/assets/og.png" />
   <meta name="theme-color" content="#ffffff" />
   <meta name="msvalidate.01" content="E93F19A9BA2EC3425BE4FDF35C62EDE1" />
 
@@ -23,49 +28,58 @@
   {
     "@context": "https://schema.org",
     "@type": "WebApplication",
-    "name": "MD 阅读器",
+    "name": "MD Reader",
     "url": "https://mdreader.xyz/",
-    "description": "在浏览器里打开、预览 Markdown 文件，免上传，可添加到桌面。",
+    "description": "Open and preview Markdown files in your browser. No upload, add to home screen.",
     "applicationCategory": "Utility",
     "operatingSystem": "HarmonyOS, Android, iOS, Windows, macOS, Web",
-    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "CNY" }
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
   }
   </script>
 
   <script src="/assets/i18n.js"></script>
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-L1LTFNC3NN"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-L1LTFNC3NN');
+  </script>
 </head>
 <body>
   <header class="site">
     <div class="wrap">
-      <a href="/" class="logo" data-i18n="brand">MD<span>·</span>阅读器</a>
+      <a href="/" class="logo" data-i18n="brand">MD<span>·</span>Reader</a>
       <nav>
-        <button id="langSwitch" class="btn small" onclick="switchLang()" data-i18n="lang-label">EN</button>
-        <button id="installBtn" class="btn ghost" hidden data-i18n="btn-install">＋ 添加到桌面</button>
-        <a href="/about" data-i18n="nav-about">介绍</a>
+        <button id="langSwitch" class="btn small" onclick="switchLang()" data-i18n="lang-label">中文</button>
+        <button id="installBtn" class="btn ghost" hidden data-i18n="btn-install">+ Add to Home Screen</button>
+        <a href="/about" data-i18n="nav-about">About</a>
       </nav>
     </div>
   </header>
 
   <main class="wrap">
     <section class="hero">
-      <h1 data-i18n="hero-title">Markdown 阅读器</h1>
-      <p class="sub" data-i18n="hero-sub">拖入 .md 文件就能看，自动排版成网页。全程在本地，不上传、不登录。</p>
+      <h1 data-i18n="hero-title">Markdown Reader</h1>
+      <p class="sub" data-i18n="hero-sub">Drop a .md file and read it right here — beautifully formatted. No upload, no login, 100% in your browser.</p>
 
       <div class="dropzone" id="dropzone">
-        <div class="big" data-i18n="dropzone-big">点击选择，或把 .md 文件拖到这里</div>
-        <div class="small" data-i18n="dropzone-small">支持 .md / .markdown / .txt · 文件不会离开你的设备</div>
+        <div class="big" data-i18n="dropzone-big">Tap to select, or drop a .md file here</div>
+        <div class="small" data-i18n="dropzone-small">Supports .md / .markdown / .txt · Your file never leaves your device</div>
         <input type="file" id="fileInput" accept=".md,.markdown,.txt,text/markdown,text/plain" />
       </div>
 
       <div class="url-bar">
-        <input type="url" id="urlInput" data-i18n="url-placeholder" placeholder="或粘贴链接导入，如 https://raw.githubusercontent.com/…" />
-        <button id="urlLoad" class="btn primary" data-i18n="url-btn">打开</button>
+        <input type="url" id="urlInput" data-i18n="url-placeholder" placeholder="Or paste a link, e.g. https://raw.githubusercontent.com/…" />
+        <button id="urlLoad" class="btn primary" data-i18n="url-btn">Open</button>
       </div>
 
       <div class="hero-links">
-        <a href="?demo" data-i18n="demo-link">看个示例 →</a>
+        <a href="?demo" data-i18n="demo-link">Try a demo →</a>
         <span class="dot">·</span>
-        <a href="/about#desktop" data-i18n="howto-link">怎么添加到桌面？</a>
+        <a href="/about#desktop" data-i18n="howto-link">How to add to home screen?</a>
       </div>
 
       <div id="status"></div>
@@ -75,10 +89,10 @@
       <div class="toolbar" id="toolbar">
         <span class="tbar-title" id="tbTitle">—</span>
         <div class="tbar-actions">
-          <button class="btn small" id="btnRaw" data-i18n="toolbar-source">查看源码</button>
-          <button class="btn small" id="btnCopy" data-i18n="toolbar-copy">复制</button>
-          <button class="btn small" id="btnPrint" data-i18n="toolbar-pdf">导出 PDF</button>
-          <button class="btn small" id="btnDownload" data-i18n="toolbar-save">存为网页</button>
+          <button class="btn small" id="btnRaw" data-i18n="toolbar-source">View Source</button>
+          <button class="btn small" id="btnCopy" data-i18n="toolbar-copy">Copy</button>
+          <button class="btn small" id="btnPrint" data-i18n="toolbar-pdf">Print PDF</button>
+          <button class="btn small" id="btnDownload" data-i18n="toolbar-save">Save .html</button>
         </div>
       </div>
       <article class="md-body" id="mdBody"></article>
@@ -88,7 +102,7 @@
 
   <footer class="site">
     <div class="wrap">
-      <p data-i18n="footer-home">MD 阅读器 · 免费 · 不上传 · 可添加到桌面 — <a href="/about">详细介绍</a> · <a href="/privacy">隐私说明</a></p>
+      <p data-i18n="footer-home">MD Reader · Free · No Upload · Add to Home Screen — <a href="/about">About</a> · <a href="/privacy">Privacy</a></p>
     </div>
   </footer>
 

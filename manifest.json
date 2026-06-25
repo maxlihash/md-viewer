@@ -1,8 +1,8 @@
 {
-  "name": "MD 阅读器 — Markdown 预览",
-  "short_name": "MD 阅读器",
-  "description": "在浏览器里打开、预览 Markdown 文件，免上传，可添加到桌面。",
-  "lang": "zh-CN",
+  "name": "MD Reader — Markdown Preview",
+  "short_name": "MD Reader",
+  "description": "Open and preview Markdown files in your browser. No upload. Add to home screen.",
+  "lang": "en",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
