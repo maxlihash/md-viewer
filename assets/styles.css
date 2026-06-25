@@ -18,6 +18,7 @@ body {
   color: var(--txt);
   font: 16px/1.7 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "HarmonyOS Sans SC", "Microsoft YaHei", Roboto, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 a { color: var(--accent); text-decoration: none; }
 a:hover { text-decoration: underline; }
@@ -146,7 +147,7 @@ nav a { color: var(--muted); font-size: 14px; }
 .doc details p { margin: 8px 0 0; color: var(--muted); font-size: 14px; }
 
 /* ——— 页脚 ——— */
-footer.site { border-top: 1px solid var(--border); padding: 24px 0; margin-top: 48px; }
+footer.site { border-top: 1px solid var(--border); padding: 24px 0 calc(24px + env(safe-area-inset-bottom, 0px)); margin-top: 48px; }
 footer.site p { font-size: 13px; color: var(--muted); margin: 0; text-align: center; }
 
 /* ——— 响应式 ——— */
@@ -167,7 +168,7 @@ footer.site p { font-size: 13px; color: var(--muted); margin: 0; text-align: cen
   .doc { padding: 20px 16px; }
   .doc h1 { font-size: 22px; }
   .how-grid { grid-template-columns: 1fr; }
-  footer.site { padding: 20px 0; }
+  footer.site { padding: 20px 0 calc(20px + env(safe-area-inset-bottom, 0px)); }
 }
 
 /* ——— 夜间阅读（跟随系统）——— */
