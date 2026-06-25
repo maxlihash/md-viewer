@@ -17,6 +17,6 @@
 /manifest.json
   Cache-Control: no-cache
 
-# Assets: short cache (1h), CDN respects it
+# Assets: always revalidate (conditional request → 304 if unchanged)
 /assets/*
-  Cache-Control: public, max-age=3600
+  Cache-Control: no-cache
