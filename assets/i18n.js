@@ -27,7 +27,7 @@ window.I18N = {
     'toolbar-save': '存为网页',
     'toolbar-pdf': '导出 PDF',
     'toolbar-copy': '复制',
-    'footer-home': 'MD 阅读器 · 免费 · 不上传 · 可添加到桌面 — 详细介绍 · 隐私说明',
+    'footer-home': 'MD 阅读器 · 免费 · 不上传 · 可添加到桌面 — <a href="/about">详细介绍</a> · <a href="/privacy">隐私说明</a>',
     'install-done': '✅ 已添加到桌面，下次从桌面图标直接打开。',
     'empty-file': '（空文件）',
 
@@ -114,7 +114,7 @@ window.I18N = {
     'about-h2-tech': '技术说明',
     'about-tech-desc': '纯静态页面，前端 HTML + CSS + 原生 JS，没有后端、没有数据库、没有打包步骤。Markdown 解析用 <a href="https://github.com/markedjs/marked" target="_blank" rel="noopener">marked.js</a>，本地文件读取用浏览器 File API，离线用 Service Worker 缓存，添加到桌面靠 Web App Manifest（PWA）。无埋点、无第三方统计。',
     'about-back': '← 回首页打开文件',
-    'about-footer': 'MD 阅读器 · 免费 · 不上传 — 首页 · 隐私说明',
+    'about-footer': 'MD 阅读器 · 免费 · 不上传 — <a href="/">首页</a> · <a href="/about">详细介绍</a> · <a href="/privacy">隐私说明</a>',
 
     // privacy.html
     'privacy-title': '隐私说明 — MD 阅读器',
@@ -135,7 +135,7 @@ window.I18N = {
     'privacy-h2-contact': '联系',
     'privacy-contact': '有问题可邮件 <a href="mailto:hello@mdreader.xyz">hello@mdreader.xyz</a>。',
     'privacy-back': '← 回首页',
-    'privacy-footer': 'MD 阅读器 · 免费 · 不上传 — 首页 · 介绍',
+    'privacy-footer': 'MD 阅读器 · 免费 · 不上传 — <a href="/">首页</a> · <a href="/about">详细介绍</a> · <a href="/privacy">隐私说明</a>',
 
     // manifest.json
     'manifest-name': 'MD 阅读器 — Markdown 预览',
@@ -173,7 +173,7 @@ window.I18N = {
     'toolbar-save': 'Save .html',
     'toolbar-pdf': 'Print PDF',
     'toolbar-copy': 'Copy',
-    'footer-home': 'MD Reader · Free · No Upload · Add to Home Screen — About · Privacy',
+    'footer-home': 'MD Reader · Free · No Upload · Add to Home Screen — <a href="/about">About</a> · <a href="/privacy">Privacy</a>',
     'install-done': '✅ Added to home screen. Open from your home screen next time.',
     'empty-file': '(empty file)',
 
@@ -260,7 +260,7 @@ window.I18N = {
     'about-h2-tech': 'Tech',
     'about-tech-desc': 'Static site — HTML + CSS + vanilla JS, no backend, no database, no build step. Markdown parsing by <a href="https://github.com/markedjs/marked" target="_blank" rel="noopener">marked.js</a>. Local file reading via the browser File API. Offline support via Service Worker. Installation via Web App Manifest (PWA). No tracking, no third-party analytics.',
     'about-back': '← Back to reader',
-    'about-footer': 'MD Reader · Free · No Upload — Home · Privacy',
+    'about-footer': 'MD Reader · Free · No Upload — <a href="/">Home</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a>',
 
     // privacy.html
     'privacy-title': 'Privacy — MD Reader',
@@ -281,7 +281,7 @@ window.I18N = {
     'privacy-h2-contact': 'Contact',
     'privacy-contact': 'Questions? Email <a href="mailto:hello@mdreader.xyz">hello@mdreader.xyz</a>.',
     'privacy-back': '← Back home',
-    'privacy-footer': 'MD Reader · Free · No Upload — Home · About',
+    'privacy-footer': 'MD Reader · Free · No Upload — <a href="/">Home</a> · <a href="/about">About</a> · <a href="/privacy">Privacy</a>',
 
     // manifest.json
     'manifest-name': 'MD Reader — Markdown Preview',
