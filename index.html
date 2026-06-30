@@ -54,7 +54,6 @@
       <a href="/" class="logo" data-i18n="brand">MD<span>·</span>Reader</a>
       <nav>
         <button id="langSwitch" class="btn small" onclick="switchLang()" data-i18n="lang-label">中文</button>
-        <button id="installBtn" class="btn ghost" hidden data-i18n="btn-install">+ Add to Home Screen</button>
         <a href="/about" data-i18n="nav-about">About</a>
       </nav>
     </div>
@@ -64,6 +63,9 @@
     <section class="hero">
       <h1 data-i18n="hero-title">Markdown Reader</h1>
       <p class="sub" data-i18n="hero-sub">Drop a .md file and read it right here — beautifully formatted. No upload, no login, 100% in your browser.</p>
+      <div class="hero-install">
+        <button id="installBtn" class="btn" hidden data-i18n="btn-install">+ Add to Home Screen</button>
+      </div>
 
       <div class="dropzone" id="dropzone">
         <div class="big" data-i18n="dropzone-big">Tap to select, or drop a .md file here</div>

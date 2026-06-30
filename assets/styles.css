@@ -36,7 +36,8 @@ nav a { color: var(--muted); font-size: 14px; }
 /* ——— hero ——— */
 .hero { padding: 48px 0 8px; text-align: center; }
 .hero h1 { font-size: 30px; margin: 0 0 8px; letter-spacing: -0.02em; }
-.hero p.sub { color: var(--muted); margin: 0 auto 24px; max-width: 480px; font-size: 15px; }
+.hero p.sub { color: var(--muted); margin: 0 auto 16px; max-width: 480px; font-size: 15px; }
+.hero-install { margin-bottom: 24px; }
 .hero-links { margin-top: 14px; font-size: 13px; color: var(--muted); }
 .hero-links a { color: var(--muted); }
 .hero-links a:hover { color: var(--accent); }
