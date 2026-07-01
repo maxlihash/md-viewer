@@ -365,54 +365,113 @@ function updateRefreshButton() {
 
 // ══════════════════════════════════════════
 // Feature 3: 可分享链接 (Shareable Link)
+// deflate-raw via browser CompressionStream + base64url
 // ══════════════════════════════════════════
 
-function encodeShare(raw) {
-  if (typeof LZString === 'undefined') {
-    console.error('[share] LZString not loaded');
+// --- base64url helpers (RFC 4648 §5) ---
+function base64urlFromBytes(buf) {
+  var binary = '';
+  for (var i = 0; i < buf.length; i++) {
+    binary += String.fromCharCode(buf[i]);
+  }
+  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+
+function bytesFromBase64url(str) {
+  var base64 = str.replace(/-/g, '+').replace(/_/g, '/');
+  while (base64.length % 4) base64 += '=';
+  var binary = atob(base64);
+  var buf = new Uint8Array(binary.length);
+  for (var i = 0; i < binary.length; i++) {
+    buf[i] = binary.charCodeAt(i);
+  }
+  return buf;
+}
+
+// --- deflate helpers ---
+function compressionSupported() {
+  return typeof CompressionStream !== 'undefined' && typeof DecompressionStream !== 'undefined';
+}
+
+async function deflateCompress(raw) {
+  var encoder = new TextEncoder();
+  var stream = new CompressionStream('deflate-raw');
+  var writer = stream.writable.getWriter();
+  writer.write(encoder.encode(raw));
+  writer.close();
+  var reader = stream.readable.getReader();
+  var chunks = [];
+  while (true) {
+    var chunk = await reader.read();
+    if (chunk.done) break;
+    chunks.push(chunk.value);
+  }
+  var total = chunks.reduce(function (s, c) { return s + c.length; }, 0);
+  var merged = new Uint8Array(total);
+  var offset = 0;
+  for (var i = 0; i < chunks.length; i++) {
+    merged.set(chunks[i], offset);
+    offset += chunks[i].length;
+  }
+  return base64urlFromBytes(merged);
+}
+
+async function deflateDecompress(encoded) {
+  var buf = bytesFromBase64url(encoded);
+  var stream = new DecompressionStream('deflate-raw');
+  var writer = stream.writable.getWriter();
+  writer.write(buf);
+  writer.close();
+  var reader = stream.readable.getReader();
+  var chunks = [];
+  while (true) {
+    var chunk = await reader.read();
+    if (chunk.done) break;
+    chunks.push(chunk.value);
+  }
+  var decoder = new TextDecoder();
+  var parts = [];
+  for (var i = 0; i < chunks.length; i++) {
+    parts.push(decoder.decode(chunks[i]));
+  }
+  return parts.join('');
+}
+
+async function encodeShare(raw) {
+  if (!compressionSupported()) {
+    console.error('[share] CompressionStream not supported');
     return null;
   }
   try {
-    var encoded = LZString.compressToEncodedURIComponent(raw);
-    if (!encoded) {
-      console.error('[share] compressToEncodedURIComponent returned empty');
-      return null;
-    }
-    return encoded;
+    return await deflateCompress(raw);
   } catch (e) {
     console.error('[share] encode error:', e);
     return null;
   }
 }
 
-function decodeShare(encoded) {
-  if (typeof LZString === 'undefined') {
-    console.error('[share] LZString not loaded for decode');
+async function decodeShare(encoded) {
+  if (!compressionSupported()) {
+    console.error('[share] DecompressionStream not supported');
     return null;
   }
   try {
-    var decoded = LZString.decompressFromEncodedURIComponent(encoded);
-    // LZ-String returns empty string for invalid input, null for error
-    if (decoded === '' || decoded === null) {
-      console.error('[share] decompressFromEncodedURIComponent returned: ' + JSON.stringify(decoded));
-      return null;
-    }
-    return decoded;
+    return await deflateDecompress(encoded);
   } catch (e) {
     console.error('[share] decode error:', e);
     return null;
   }
 }
 
-function loadFromHash() {
+async function loadFromHash() {
   var hash = location.hash;
   if (!hash || !hash.startsWith('#s=')) return false;
   var encoded = hash.slice(3);
   if (!encoded) return false;
-  var decoded = decodeShare(encoded);
+  var decoded = await decodeShare(encoded);
   if (decoded === null || decoded === '') {
     showStatus(t('share-decode-error'), 'error');
-    return true; // 尝试了解码但失败了
+    return true;
   }
   currentFileName = '';
   currentFile = null;
@@ -427,7 +486,7 @@ async function copyShareLink() {
     showStatus(t('share-no-content'), 'warning');
     return;
   }
-  var encoded = encodeShare(currentRaw);
+  var encoded = await encodeShare(currentRaw);
   if (!encoded) {
     showStatus(t('share-error'), 'warning');
     return;
@@ -578,7 +637,7 @@ function showDemo() {
 // 初始化
 // ══════════════════════════════════════════
 
-function initFeatures() {
+async function initFeatures() {
   loadAutoRefreshPref();
   updateRefreshButton();
 
@@ -587,7 +646,7 @@ function initFeatures() {
   if (btnShare) btnShare.addEventListener('click', copyShareLink);
 
   // Load shared content from hash first (before demo)
-  var loadedFromHash = loadFromHash();
+  var loadedFromHash = await loadFromHash();
 
   // Load demo if ?demo and no hash content
   if (!loadedFromHash && new URLSearchParams(location.search).has('demo')) {
