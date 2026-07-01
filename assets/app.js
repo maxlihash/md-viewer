@@ -361,20 +361,40 @@ function updateRefreshButton() {
 // ══════════════════════════════════════════
 
 function encodeShare(raw) {
-  if (typeof LZString === 'undefined') return null;
+  if (typeof LZString === 'undefined') {
+    console.error('[share] LZString not loaded');
+    return null;
+  }
   try {
-    return LZString.compressToEncodedURIComponent(raw);
-  } catch (e) { return null; }
+    var encoded = LZString.compressToEncodedURIComponent(raw);
+    if (!encoded) {
+      console.error('[share] compressToEncodedURIComponent returned empty');
+      return null;
+    }
+    return encoded;
+  } catch (e) {
+    console.error('[share] encode error:', e);
+    return null;
+  }
 }
 
 function decodeShare(encoded) {
-  if (typeof LZString === 'undefined') return null;
+  if (typeof LZString === 'undefined') {
+    console.error('[share] LZString not loaded for decode');
+    return null;
+  }
   try {
     var decoded = LZString.decompressFromEncodedURIComponent(encoded);
-    // LZ-String returns empty string (not null) for invalid input
-    if (!decoded && encoded.length > 0) return null;
+    // LZ-String returns empty string for invalid input, null for error
+    if (decoded === '' || decoded === null) {
+      console.error('[share] decompressFromEncodedURIComponent returned: ' + JSON.stringify(decoded));
+      return null;
+    }
     return decoded;
-  } catch (e) { return null; }
+  } catch (e) {
+    console.error('[share] decode error:', e);
+    return null;
+  }
 }
 
 function loadFromHash() {
