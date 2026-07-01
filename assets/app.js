@@ -6,7 +6,7 @@ const dropzone = document.getElementById('dropzone');
 const fileInput = document.getElementById('fileInput');
 const urlInput = document.getElementById('urlInput');
 const urlLoad = document.getElementById('urlLoad');
-const statusEl = document.getElementById('status');
+
 const viewer = document.getElementById('viewer');
 const mdBody = document.getElementById('mdBody');
 const mdRaw = document.getElementById('mdRaw');
@@ -52,21 +52,21 @@ fileInput.addEventListener('change', () => {
 
 function loadFile(file) {
   if (!file.name.match(/\.(md|markdown|txt)$/i)) {
-    showStatus(t('status-not-md'), 'warning');
+    toast(t('status-not-md'), 'warn');
     return;
   }
   currentFileName = file.name;
   currentFile = file;
   currentUrl = null;
-  showStatus(t('status-reading'), '');
+  toast(t('status-reading'), 'info');
   const reader = new FileReader();
   reader.onload = () => {
     render(reader.result, file.name);
-    showStatus(t('status-ok-local'), 'ok');
+    toast(t('status-ok-local'), 'ok');
     addHistory({ type: 'file', name: file.name, time: Date.now(), snippet: snippet(reader.result) });
     ensureAutoRefresh();
   };
-  reader.onerror = () => showStatus(t('status-read-error'), 'error');
+  reader.onerror = () => toast(t('status-read-error'), 'error');
   reader.readAsText(file);
 }
 
@@ -76,10 +76,10 @@ urlInput.addEventListener('keydown', e => { if (e.key === 'Enter') loadFromURL()
 
 async function loadFromURL() {
   const url = urlInput.value.trim();
-  if (!url) { showStatus(t('status-no-url'), 'warning'); return; }
-  if (!url.startsWith('http')) { showStatus(t('status-bad-url'), 'warning'); return; }
+  if (!url) { toast(t('status-no-url'), 'warn'); return; }
+  if (!url.startsWith('http')) { toast(t('status-bad-url'), 'warn'); return; }
 
-  showStatus(t('status-fetching'), '');
+  toast(t('status-fetching'), 'info');
   try {
     const resp = await fetch(url);
     if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
@@ -89,11 +89,11 @@ async function loadFromURL() {
     currentFile = null;
     currentUrl = url;
     render(text, name);
-    showStatus(t('status-ok-url'), 'ok');
+    toast(t('status-ok-url'), 'ok');
     addHistory({ type: 'url', name: name, url: url, time: Date.now(), snippet: snippet(text) });
     ensureAutoRefresh();
   } catch (err) {
-    showStatus(t('status-fetch-error').replace('{0}', err.message), 'error');
+    toast(t('status-fetch-error').replace('{0}', err.message), 'error');
   }
 }
 
@@ -142,15 +142,15 @@ document.getElementById('btnCopy').addEventListener('click', async () => {
       await navigator.clipboard.write([
         new ClipboardItem({ 'text/html': new Blob([html], { type: 'text/html' }), 'text/plain': new Blob([currentRaw], { type: 'text/plain' }) })
       ]);
-      showStatus(t('status-copied-rich'), 'ok');
+      toast(t('status-copied-rich'), 'ok');
       return;
     } catch { /* rich text 失败，降级到纯文本 */ }
   }
   // Fallback: writeText 或 execCommand
   if (await copyTextFallback(currentRaw)) {
-    showStatus(t('status-copied-plain'), 'ok');
+    toast(t('status-copied-plain'), 'ok');
   } else {
-    showStatus(t('status-read-error'), 'error');
+    toast(t('status-read-error'), 'error');
   }
 });
 
@@ -306,8 +306,7 @@ function startAutoRefresh() {
           var scrollY = window.scrollY;
           render(reader.result, currentFileName);
           window.scrollTo(0, scrollY);
-          showStatus(t('status-refreshed'), 'ok');
-          setTimeout(function () { showStatus('', ''); }, 2000);
+          toast(t('status-refreshed'), 'ok');
           // 更新 currentFile.lastModified 标记
           lastMod = currentFile.lastModified;
         }
@@ -325,8 +324,7 @@ function startAutoRefresh() {
           var scrollY = window.scrollY;
           render(text, currentFileName);
           window.scrollTo(0, scrollY);
-          showStatus(t('status-refreshed'), 'ok');
-          setTimeout(function () { showStatus('', ''); }, 2000);
+          toast(t('status-refreshed'), 'ok');
         }
       } catch (e) { /* 网络错误，静默忽略 */ }
     }, 10000);
@@ -470,52 +468,57 @@ async function loadFromHash() {
   if (!encoded) return false;
   var decoded = await decodeShare(encoded);
   if (decoded === null || decoded === '') {
-    showStatus(t('share-decode-error'), 'error');
+    toast(t('share-decode-error'), 'error');
     return true;
   }
   currentFileName = '';
   currentFile = null;
   currentUrl = null;
   render(decoded, t('share-title'));
-  showStatus('', '');
   return true;
 }
 
 async function copyShareLink() {
   if (!currentRaw) {
-    showStatus(t('share-no-content'), 'warning');
+    toast(t('share-no-content'), 'warn');
     return;
   }
   var encoded = await encodeShare(currentRaw);
   if (!encoded) {
-    showStatus(t('share-error'), 'warning');
+    toast(t('share-error'), 'warn');
     return;
   }
   var url = location.origin + location.pathname + '#s=' + encoded;
   // 超长警告
   if (url.length > 4000) {
-    showStatus(t('share-too-large'), 'warning');
+    toast(t('share-too-large'), 'warn');
   }
   try {
     if (await copyTextFallback(url)) {
-      showStatus(t('share-copied'), 'ok');
-      setTimeout(function () {
-        if (statusEl.textContent === t('share-copied')) {
-          showStatus('', '');
-        }
-      }, 3000);
+      toast(t('share-copied'), 'ok');
     } else {
-      showStatus(t('share-error'), 'warning');
+      toast(t('share-error'), 'warn');
     }
   } catch (e) {
-    showStatus(t('share-error'), 'warning');
+    toast(t('share-error'), 'warn');
   }
 }
 
 // ——— Helpers ———
-function showStatus(msg, cls) {
-  statusEl.textContent = msg;
-  statusEl.style.color = cls === 'error' ? '#d92020' : cls === 'warning' ? '#b25e00' : cls === 'ok' ? '#1a7f37' : 'var(--muted)';
+function toast(msg, type, duration) {
+  // type: 'ok' | 'error' | 'warn' | 'info'
+  duration = duration || 2500;
+  var el = document.createElement('div');
+  el.className = 'toast toast-' + (type || 'info');
+  el.textContent = msg;
+  document.body.appendChild(el);
+  requestAnimationFrame(function () {
+    el.classList.add('show');
+  });
+  setTimeout(function () {
+    el.classList.remove('show');
+    setTimeout(function () { el.remove(); }, 300);
+  }, duration);
 }
 
 function downloadBlob(content, filename, mime) {
@@ -596,7 +599,7 @@ if (installBtn) {
 
 window.addEventListener('appinstalled', () => {
   if (installBtn) installBtn.hidden = true;
-  showStatus(t('install-done'), 'ok');
+  toast(t('install-done'), 'ok');
 });
 
 // ——— 打开 ?demo 时载入示例 ———
@@ -629,7 +632,7 @@ function buildDemo() {
 
 function showDemo() {
   render(buildDemo(), 'demo.md');
-  showStatus(t('status-demo'), 'ok');
+  toast(t('status-demo'), 'ok');
   addHistory({ type: 'url', name: 'demo.md', url: location.origin + location.pathname + '?demo', time: Date.now(), snippet: t('demo-h1') });
 }
 

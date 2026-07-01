@@ -220,6 +220,27 @@ footer.site p { font-size: 13px; color: var(--muted); margin: 0; text-align: cen
   .dropzone:hover, .dropzone.dragover, .btn.ghost:hover { background: #1d2740; }
   #btnRefresh.refresh-on::before { background: #3ecf6e; }
   .meta { color: var(--muted); }
+  .toast-ok    { background: #0d2818; color: #3ecf6e; border-color: #1a5c30; }
+  .toast-error { background: #2d1111; color: #f87171; border-color: #5c1a1a; }
+  .toast-warn  { background: #2d1f0d; color: #fbbf24; border-color: #5c3d1a; }
+}
+
+/* ——— Toast 提示 ——— */
+.toast {
+  position: fixed; top: 16px; left: 50%; transform: translateX(-50%) translateY(-140%);
+  padding: 10px 22px; border-radius: 10px; font-size: 14px; font-weight: 500;
+  z-index: 1000; transition: transform .25s cubic-bezier(.4,0,.2,1);
+  max-width: 90vw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  pointer-events: none; box-shadow: 0 4px 16px rgba(0,0,0,.10);
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+.toast-ok    { background: #e6f7ed; color: #1a7f37; border: 1px solid #b7e4c7; }
+.toast-error { background: #ffeaea; color: #d92020; border: 1px solid #f5c6c6; }
+.toast-warn  { background: #fff3e0; color: #b25e00; border: 1px solid #ffcc80; }
+.toast-info  { background: var(--panel); color: var(--muted); border: 1px solid var(--border); }
+
+@media (max-width: 640px) {
+  .toast { font-size: 13px; padding: 8px 16px; top: 12px; }
 }
 
 /* ——— 打印 / 导出 PDF ——— */
