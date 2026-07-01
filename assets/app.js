@@ -136,14 +136,21 @@ document.getElementById('btnPrint').addEventListener('click', () => window.print
 
 document.getElementById('btnCopy').addEventListener('click', async () => {
   const html = mdBody.innerHTML;
-  try {
-    await navigator.clipboard.write([
-      new ClipboardItem({ 'text/html': new Blob([html], { type: 'text/html' }), 'text/plain': new Blob([currentRaw], { type: 'text/plain' }) })
-    ]);
-    showStatus(t('status-copied-rich'), 'ok');
-  } catch {
-    await navigator.clipboard.writeText(currentRaw);
+  // 优先 rich text clipboard API（需 HTTPS 或 localhost）
+  if (navigator.clipboard && typeof ClipboardItem !== 'undefined') {
+    try {
+      await navigator.clipboard.write([
+        new ClipboardItem({ 'text/html': new Blob([html], { type: 'text/html' }), 'text/plain': new Blob([currentRaw], { type: 'text/plain' }) })
+      ]);
+      showStatus(t('status-copied-rich'), 'ok');
+      return;
+    } catch { /* rich text 失败，降级到纯文本 */ }
+  }
+  // Fallback: writeText 或 execCommand
+  if (await copyTextFallback(currentRaw)) {
     showStatus(t('status-copied-plain'), 'ok');
+  } else {
+    showStatus(t('status-read-error'), 'error');
   }
 });
 
@@ -431,13 +438,16 @@ async function copyShareLink() {
     showStatus(t('share-too-large'), 'warning');
   }
   try {
-    await navigator.clipboard.writeText(url);
-    showStatus(t('share-copied'), 'ok');
-    setTimeout(function () {
-      if (statusEl.textContent === t('share-copied')) {
-        showStatus('', '');
-      }
-    }, 3000);
+    if (await copyTextFallback(url)) {
+      showStatus(t('share-copied'), 'ok');
+      setTimeout(function () {
+        if (statusEl.textContent === t('share-copied')) {
+          showStatus('', '');
+        }
+      }, 3000);
+    } else {
+      showStatus(t('share-error'), 'warning');
+    }
   } catch (e) {
     showStatus(t('share-error'), 'warning');
   }
@@ -461,6 +471,31 @@ function escapeHtml(str) {
   const d = document.createElement('div');
   d.textContent = str;
   return d.innerHTML;
+}
+
+// 剪贴板 fallback：支持非 HTTPS 环境（execCommand）
+async function copyTextFallback(text) {
+  if (navigator.clipboard) {
+    try {
+      await navigator.clipboard.writeText(text);
+      return true;
+    } catch { /* 降级到 execCommand */ }
+  }
+  // 传统方案：临时 textarea + execCommand
+  var ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.position = 'fixed';
+  ta.style.left = '-9999px';
+  ta.style.top = '-9999px';
+  document.body.appendChild(ta);
+  ta.focus();
+  ta.select();
+  var ok = false;
+  try {
+    ok = document.execCommand('copy');
+  } catch (e) { /* ignore */ }
+  document.body.removeChild(ta);
+  return ok;
 }
 
 // ——— Paste file from clipboard (⌘V / Ctrl+V) ———
