@@ -66,7 +66,6 @@ nav a { color: var(--muted); font-size: 14px; }
 }
 .url-bar input { flex: 1; background: none; border: none; color: var(--txt); font-size: 14px; outline: none; }
 .url-bar input::placeholder { color: var(--muted); font-size: 13px; }
-#status { font-size: 13px; color: var(--muted); margin-top: 10px; min-height: 20px; }
 
 /* ——— 历史面板 ——— */
 .history-panel { margin-top: 16px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--panel); }
@@ -93,6 +92,13 @@ nav a { color: var(--muted); font-size: 14px; }
 }
 .hi-time { flex-shrink: 0; color: var(--muted); font-size: 12px; white-space: nowrap; }
 .hi-action { flex-shrink: 0; font-size: 11px !important; padding: 3px 10px !important; }
+.hi-delete {
+  flex-shrink: 0; font-size: 14px; line-height: 1;
+  padding: 2px 6px; border: none; background: none;
+  color: var(--muted); cursor: pointer; border-radius: 4px;
+  transition: color .12s, background .12s;
+}
+.hi-delete:hover { color: #ef4444; background: var(--panel-2); }
 
 /* ——— 刷新按钮状态指示 ——— */
 #btnRefresh { position: relative; padding-right: 10px; }
@@ -241,6 +247,57 @@ footer.site p { font-size: 13px; color: var(--muted); margin: 0; text-align: cen
 
 @media (max-width: 640px) {
   .toast { font-size: 13px; padding: 8px 16px; top: 12px; }
+}
+
+/* ——— 网页全屏 ——— */
+body.expanded-view header.site,
+body.expanded-view footer.site,
+body.expanded-view .hero { display: none; }
+body.expanded-view .viewer {
+  position: fixed; inset: 0; z-index: 100; overflow-y: auto;
+  background: var(--bg); margin: 0; padding: 16px;
+}
+body.expanded-view .toolbar { border-radius: var(--radius); }
+
+/* ——— 分享弹窗 ——— */
+.share-overlay {
+  position: fixed; inset: 0; z-index: 1001;
+  background: rgba(0,0,0,.45); backdrop-filter: blur(4px);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; visibility: hidden; transition: opacity .2s, visibility .2s;
+}
+.share-overlay.open { opacity: 1; visibility: visible; }
+.share-dialog {
+  background: var(--bg); border-radius: 16px; padding: 24px;
+  max-width: 360px; width: 90vw; box-shadow: 0 8px 32px rgba(0,0,0,.18);
+  transform: translateY(12px); transition: transform .25s ease;
+}
+.share-overlay.open .share-dialog { transform: translateY(0); }
+.share-dialog-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 16px; font-size: 16px; font-weight: 600; color: var(--txt);
+}
+.share-dialog-close {
+  background: none; border: none; font-size: 22px; color: var(--muted);
+  cursor: pointer; padding: 0 4px; line-height: 1;
+}
+.share-dialog-close:hover { color: var(--txt); }
+.share-qr-wrap {
+  background: #fff; border-radius: 12px; padding: 12px;
+  display: flex; justify-content: center; margin-bottom: 12px;
+}
+.share-qr { line-height: 0; }
+.share-qr svg { display: block; width: 200px; height: 200px; }
+.share-meta {
+  text-align: center; font-size: 13px; color: var(--muted); margin-bottom: 16px;
+}
+.share-meta span { display: block; }
+.share-actions { text-align: center; }
+.share-actions .btn { min-width: 140px; }
+
+@media (max-width: 640px) {
+  .share-dialog { padding: 18px; }
+  .share-qr svg { width: 160px; height: 160px; }
 }
 
 /* ——— 打印 / 导出 PDF ——— */

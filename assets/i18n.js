@@ -27,6 +27,10 @@ window.I18N = {
     'toolbar-save': '存为网页',
     'toolbar-pdf': '导出 PDF',
     'toolbar-copy': '复制',
+    'toolbar-expand': '网页全屏',
+    'toolbar-expand-exit': '退出',
+    'toolbar-fullscreen': '全屏',
+    'toolbar-fullscreen-exit': '退出全屏',
     'footer-home': 'MD 阅读器 · 免费 · 不上传 · 可添加到桌面 — <a href="/about">详细介绍</a> · <a href="/privacy">隐私说明</a>',
     'install-done': '✅ 已添加到桌面，下次从桌面图标直接打开。',
     'empty-file': '（空文件）',
@@ -49,21 +53,37 @@ window.I18N = {
     // history
     'history-title': '最近打开',
     'history-empty': '暂无打开记录',
-    'history-reopen': '重新打开',
+    'history-reopen': '打开',
     'history-reselect': '重新选择',
+    'history-delete': '删除',
+
+    // manual reload
+    'reload-btn': '🔄',
+    'reload-loading': '刷新中…',
+    'reload-ok': '✅ 已刷新',
+    'reload-unchanged': '内容未变化',
+    'reload-no-content': '请先打开一个文件',
+    'reload-error': '❌ 刷新失败',
+    'reload-replaced': '⚠️ 文件已被外部编辑器替换，请重新选择文件',
 
     // auto-refresh
     'refresh-on': 'Auto',
     'refresh-off': 'Auto',
 
     // share link
-    'share-copy': '复制链接',
+    'share-copy': '分享',
     'share-copied': '✅ 链接已复制！',
     'share-too-large': '⚠️ 内容过长，链接可能被截断',
     'share-title': '分享内容',
     'share-decode-error': '⚠️ 无法解析分享链接',
     'share-no-content': '请先打开一个文件',
     'share-error': '生成链接失败',
+    'share-dialog-title': '分享文档',
+    'share-dialog-copy': '复制链接',
+    'share-dialog-copied': '✅ 已复制',
+    'share-dialog-close': '关闭',
+    'share-dialog-size': '文件',
+    'share-dialog-chars': '压缩后',
 
     // demo content
     'demo-h1': 'Markdown 示例',
@@ -193,6 +213,10 @@ window.I18N = {
     'toolbar-save': 'Save .html',
     'toolbar-pdf': 'Print PDF',
     'toolbar-copy': 'Copy',
+    'toolbar-expand': 'Expand',
+    'toolbar-expand-exit': 'Exit',
+    'toolbar-fullscreen': 'Fullscreen',
+    'toolbar-fullscreen-exit': 'Exit fullscreen',
     'footer-home': 'MD Reader · Free · No Upload · Add to Home Screen — <a href="/about">About</a> · <a href="/privacy">Privacy</a>',
     'install-done': '✅ Added to home screen. Open from your home screen next time.',
     'empty-file': '(empty file)',
@@ -215,21 +239,37 @@ window.I18N = {
     // history
     'history-title': 'Recent',
     'history-empty': 'No history',
-    'history-reopen': 'Reopen',
+    'history-reopen': 'Open',
     'history-reselect': 'Reselect',
+    'history-delete': 'Delete',
+
+    // manual reload
+    'reload-btn': '🔄',
+    'reload-loading': 'Refreshing…',
+    'reload-ok': '✅ Refreshed',
+    'reload-unchanged': 'No changes',
+    'reload-no-content': 'Open a file first',
+    'reload-error': '❌ Refresh failed',
+    'reload-replaced': '⚠️ File was replaced by editor, please reselect',
 
     // auto-refresh
     'refresh-on': 'Auto',
     'refresh-off': 'Auto',
 
     // share link
-    'share-copy': 'Copy Link',
+    'share-copy': 'Share',
     'share-copied': '✅ Link copied!',
     'share-too-large': '⚠️ Content too long, link may be truncated',
     'share-title': 'Shared content',
     'share-decode-error': '⚠️ Cannot decode share link',
     'share-no-content': 'Open a file first',
     'share-error': 'Failed to generate link',
+    'share-dialog-title': 'Share document',
+    'share-dialog-copy': 'Copy link',
+    'share-dialog-copied': '✅ Copied',
+    'share-dialog-close': 'Close',
+    'share-dialog-size': 'File',
+    'share-dialog-chars': 'Compressed',
 
     // demo content
     'demo-h1': 'Markdown Demo',

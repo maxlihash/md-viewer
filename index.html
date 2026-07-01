@@ -84,8 +84,6 @@
         <a href="/about#desktop" data-i18n="howto-link">How to add to home screen?</a>
       </div>
 
-      <div id="status"></div>
-
       <details class="history-panel" id="historyPanel">
         <summary data-i18n="history-title">Recent</summary>
         <ul class="history-list" id="historyList"></ul>
@@ -93,16 +91,36 @@
       </details>
     </section>
 
+    <!-- Share dialog -->
+    <div class="share-overlay" id="shareOverlay" hidden>
+      <div class="share-dialog" role="dialog" aria-label="Share document">
+        <div class="share-dialog-header">
+          <span data-i18n="share-dialog-title">Share document</span>
+          <button class="share-dialog-close" id="shareClose" aria-label="Close">&times;</button>
+        </div>
+        <div class="share-qr-wrap">
+          <div class="share-qr" id="shareQr"></div>
+        </div>
+        <div class="share-meta" id="shareMeta"></div>
+        <div class="share-actions">
+          <button class="btn primary" id="shareCopyBtn" data-i18n="share-dialog-copy">Copy link</button>
+        </div>
+      </div>
+    </div>
+
     <section class="viewer" id="viewer" style="display:none">
       <div class="toolbar" id="toolbar">
         <span class="tbar-title" id="tbTitle">—</span>
         <div class="tbar-actions">
+          <button class="btn small" id="btnReload" data-i18n="reload-btn" title="">🔄</button>
           <button class="btn small" id="btnRefresh" data-i18n="refresh-on" title="">Auto</button>
           <button class="btn small" id="btnRaw" data-i18n="toolbar-source">View Source</button>
           <button class="btn small" id="btnCopy" data-i18n="toolbar-copy">Copy</button>
-          <button class="btn small" id="btnShare" data-i18n="share-copy">Copy Link</button>
           <button class="btn small" id="btnPrint" data-i18n="toolbar-pdf">Print PDF</button>
           <button class="btn small" id="btnDownload" data-i18n="toolbar-save">Save .html</button>
+          <button class="btn small" id="btnExpand" data-i18n="toolbar-expand">⛶</button>
+          <button class="btn small" id="btnFullscreen" data-i18n="toolbar-fullscreen" title="">⛶</button>
+          <button class="btn small primary" id="btnShare" data-i18n="share-copy">Share</button>
         </div>
       </div>
       <article class="md-body" id="mdBody"></article>

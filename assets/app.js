@@ -12,6 +12,7 @@ const mdBody = document.getElementById('mdBody');
 const mdRaw = document.getElementById('mdRaw');
 const tbTitle = document.getElementById('tbTitle');
 const btnRefresh = document.getElementById('btnRefresh');
+const btnReload = document.getElementById('btnReload');
 const btnShare = document.getElementById('btnShare');
 const historyPanel = document.getElementById('historyPanel');
 const historyList = document.getElementById('historyList');
@@ -19,8 +20,47 @@ const historyEmpty = document.getElementById('historyEmpty');
 
 let currentFileName = '';
 let currentRaw = '';
-let currentFile = null;       // File 对象引用（本地文件自动刷新用）
+let currentFile = null;       // File 对象引用（本地文件 fallback）
+let currentHandle = null;     // FileSystemFileHandle（根治原子写入刷新）
 let currentUrl = null;        // URL 字符串（URL 自动刷新用）
+const hasFSA = typeof window.showOpenFilePicker === 'function';
+
+// ——— IndexedDB: 持久化 FileSystemFileHandle（不能序列化到 localStorage）———
+function _idb(mode) {
+  return new Promise(function (resolve, reject) {
+    var r = indexedDB.open('mdreader_fs', 1);
+    r.onupgradeneeded = function () { r.result.createObjectStore('h'); };
+    r.onsuccess = function () { resolve(r.result); };
+    r.onerror = function () { reject(r.error); };
+  }).then(function (db) {
+    return { db: db, tx: db.transaction('h', mode), store: function () { return this.tx.objectStore('h'); } };
+  });
+}
+
+function handleStore(id, handle) {
+  return _idb('readwrite').then(function (d) {
+    d.store().put(handle, id);
+    return new Promise(function (resolve) { d.tx.oncomplete = resolve; }).then(function () { d.db.close(); });
+  });
+}
+
+function handleGet(id) {
+  return _idb('readonly').then(function (d) {
+    return new Promise(function (resolve, reject) {
+      var r = d.store().get(id);
+      r.onsuccess = function () { resolve(r.result); };
+      r.onerror = function () { reject(r.error); };
+    }).then(function (h) { d.db.close(); return h; });
+  });
+}
+
+function handleDel(id) {
+  return _idb('readwrite').then(function (d) {
+    d.store().delete(id);
+    return new Promise(function (resolve) { d.tx.oncomplete = resolve; }).then(function () { d.db.close(); });
+  });
+}
+
 let showingRaw = false;
 let autoRefreshOn = true;     // 默认开启
 let autoRefreshInterval = null;
@@ -50,24 +90,55 @@ fileInput.addEventListener('change', () => {
   if (file) loadFile(file);
 });
 
-function loadFile(file) {
+// File System Access API — 点击选择时用 handle（原子写入也能刷新）
+// capture phase 拦截，防止同时弹出两个文件选择器
+dropzone.addEventListener('click', function (e) {
+  if (!hasFSA) return;
+  e.stopPropagation();
+  e.preventDefault();
+  openFileViaFSA();
+}, true);
+
+function openFileViaFSA() {
+  window.showOpenFilePicker({
+    types: [{ description: 'Markdown', accept: { 'text/markdown': ['.md', '.markdown', '.txt'] } }],
+    multiple: false
+  }).then(function (handles) {
+    var handle = handles[0];
+    return handle.getFile().then(function (file) {
+      loadFile(file, handle);
+    });
+  }).catch(function (err) {
+    if (err.name === 'AbortError') return; // 用户取消
+    // 意外错误 → 降级到传统 file input
+    fileInput.click();
+  });
+}
+
+function loadFile(file, handle) {
   if (!file.name.match(/\.(md|markdown|txt)$/i)) {
     toast(t('status-not-md'), 'warn');
     return;
   }
   currentFileName = file.name;
   currentFile = file;
+  currentHandle = handle || null;
   currentUrl = null;
   toast(t('status-reading'), 'info');
-  const reader = new FileReader();
-  reader.onload = () => {
-    render(reader.result, file.name);
+  file.text().then(function (text) {
+    render(text, file.name);
     toast(t('status-ok-local'), 'ok');
-    addHistory({ type: 'file', name: file.name, time: Date.now(), snippet: snippet(reader.result) });
+    var entry = { type: 'file', name: file.name, time: Date.now(), snippet: snippet(text) };
+    if (handle) {
+      // 持久化 handle，历史记录可直接打开不需重选
+      entry.handleId = file.name;
+      handleStore(file.name, handle);
+    }
+    addHistory(entry);
     ensureAutoRefresh();
-  };
-  reader.onerror = () => toast(t('status-read-error'), 'error');
-  reader.readAsText(file);
+  }).catch(function () {
+    toast(t('status-read-error'), 'error');
+  });
 }
 
 // ——— URL loading ———
@@ -87,6 +158,7 @@ async function loadFromURL() {
     const name = url.split('/').pop() || 'markdown';
     currentFileName = name;
     currentFile = null;
+    currentHandle = null;
     currentUrl = url;
     render(text, name);
     toast(t('status-ok-url'), 'ok');
@@ -166,6 +238,33 @@ document.getElementById('btnRaw').addEventListener('click', () => {
   updateBtnLabels();
 });
 
+// ——— 网页全屏（内容撑满视口，不走浏览器全屏 API）———
+var btnExpand = document.getElementById('btnExpand');
+if (btnExpand) {
+  btnExpand.addEventListener('click', function () {
+    document.body.classList.toggle('expanded-view');
+    btnExpand.textContent = document.body.classList.contains('expanded-view')
+      ? t('toolbar-expand-exit') : t('toolbar-expand');
+  });
+}
+
+// ——— 浏览器全屏 ———
+var btnFullscreen = document.getElementById('btnFullscreen');
+if (btnFullscreen) {
+  btnFullscreen.addEventListener('click', function () {
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+    } else {
+      viewer.requestFullscreen().catch(function () { /* not supported */ });
+    }
+  });
+  document.addEventListener('fullscreenchange', function () {
+    if (btnFullscreen) {
+      btnFullscreen.textContent = document.fullscreenElement ? t('toolbar-fullscreen-exit') : t('toolbar-fullscreen');
+    }
+  });
+}
+
 // ══════════════════════════════════════════
 // Feature 1: 文件历史 (File History)
 // ══════════════════════════════════════════
@@ -185,8 +284,20 @@ function addHistory(entry) {
       history.unshift(entry);
     }
   } else {
-    // 本地文件：直接插入，同名允许多条
-    history.unshift(entry);
+    // 本地文件：同名/同路径去重，移到顶部
+    var dedupKey = entry.handleId || entry.name;
+    var idx = history.findIndex(function (h) {
+      return h.type === 'file' && (h.handleId || h.name) === dedupKey;
+    });
+    if (idx >= 0) {
+      history[idx].time = entry.time;
+      history[idx].snippet = entry.snippet;
+      if (entry.handleId && !history[idx].handleId) history[idx].handleId = entry.handleId;
+      var item = history.splice(idx, 1)[0];
+      history.unshift(item);
+    } else {
+      history.unshift(entry);
+    }
   }
   // 最多 20 条，FIFO 淘汰
   const trimmed = history.slice(0, 20);
@@ -202,6 +313,41 @@ function loadHistory() {
   } catch { return []; }
 }
 
+function openHistoryFile(entry) {
+  if (!entry.handleId) {
+    openFileViaFSA();
+    return;
+  }
+  toast(t('status-reading'), 'info');
+  handleGet(entry.handleId).then(function (handle) {
+    if (!handle) { openFileViaFSA(); return; }
+    // 页面重载后需重新请求权限
+    return handle.queryPermission({ mode: 'read' }).then(function (state) {
+      if (state === 'granted') return handle;
+      return handle.requestPermission({ mode: 'read' }).then(function (s) {
+        if (s === 'granted') return handle;
+        throw new Error('denied');
+      });
+    });
+  }).then(function (handle) {
+    return handle.getFile();
+  }).then(function (file) {
+    return file.text().then(function (text) {
+      currentFileName = file.name;
+      currentFile = file;
+      currentHandle = null; // IndexedDB handle 是独立的，不用存 currentHandle
+      currentUrl = null;
+      render(text, file.name);
+      toast(t('status-ok-local'), 'ok');
+      // 更新历史记录时间
+      addHistory({ type: 'file', name: entry.name, time: Date.now(), snippet: snippet(text), handleId: entry.handleId });
+    });
+  }).catch(function () {
+    // handle 失效（文件移动/删除/权限拒绝）→ 回退到 picker
+    openFileViaFSA();
+  });
+}
+
 function renderHistory() {
   const history = loadHistory();
   historyList.innerHTML = '';
@@ -215,7 +361,8 @@ function renderHistory() {
     li.className = 'history-item';
     const icon = entry.type === 'url' ? '🔗' : '📄';
     const time = formatTime(entry.time);
-    const actionLabel = entry.type === 'url' ? t('history-reopen') : t('history-reselect');
+    // FSA 浏览器：本地文件也能直接打开（showOpenFilePicker），不需要"重新选择"
+    const actionLabel = entry.type === 'url' ? t('history-reopen') : (hasFSA ? t('history-reopen') : t('history-reselect'));
     const name = escapeHtml(entry.name);
     let tooltip = '';
     if (entry.type === 'url' && entry.url) {
@@ -227,14 +374,18 @@ function renderHistory() {
       `<span class="hi-icon">${icon}</span>` +
       `<span class="hi-name" title="${tooltip}">${name}</span>` +
       `<span class="hi-time">${time}</span>` +
-      `<button class="btn small hi-action" data-idx="${i}">${actionLabel}</button>`;
-    // Click row to re-open (URL only)
+      `<button class="btn small hi-action" data-idx="${i}">${actionLabel}</button>` +
+      `<button class="btn small hi-delete" data-idx="${i}" title="${escapeHtml(t('history-delete'))}">×</button>`;
+    // Click row to re-open
     if (entry.type === 'url') {
       li.style.cursor = 'pointer';
       li.addEventListener('click', () => {
         urlInput.value = entry.url;
         loadFromURL();
       });
+    } else if (hasFSA) {
+      li.style.cursor = 'pointer';
+      li.addEventListener('click', () => openHistoryFile(entry));
     }
     historyList.appendChild(li);
   });
@@ -250,12 +401,39 @@ function renderHistory() {
       if (entry.type === 'url' && entry.url) {
         urlInput.value = entry.url;
         loadFromURL();
+      } else if (hasFSA) {
+        openHistoryFile(entry);
       } else {
-        // 本地文件：无法自动重新加载，打开文件选择器
         fileInput.click();
       }
     });
   });
+
+  // Wire up delete buttons
+  historyList.querySelectorAll('.hi-delete').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const idx = parseInt(btn.dataset.idx);
+      deleteHistory(idx);
+    });
+  });
+}
+
+function deleteHistory(idx) {
+  const history = loadHistory();
+  if (idx < 0 || idx >= history.length) return;
+  var entry = history[idx];
+  history.splice(idx, 1);
+  try {
+    localStorage.setItem('mdreader_history', JSON.stringify(history));
+  } catch { /* ignore */ }
+  // 清理 IndexedDB handle
+  if (entry.handleId) {
+    // 只有同 handleId 的历史记录都删了才清 handle
+    var stillUsed = history.some(function (e) { return e.handleId === entry.handleId; });
+    if (!stillUsed) handleDel(entry.handleId);
+  }
+  renderHistory();
 }
 
 function formatTime(ts) {
@@ -296,10 +474,28 @@ function saveAutoRefreshPref() {
 
 function startAutoRefresh() {
   stopAutoRefresh();
-  if (currentFile) {
-    var lastMod = currentFile.lastModified;
+  if (currentHandle) {
+    // File System Access API — handle 按路径跟踪，原子写入无影响
+    autoRefreshInterval = setInterval(async function () {
+      try {
+        var file = await currentHandle.getFile();
+        var text = await file.text();
+        if (text !== currentRaw) {
+          var scrollY = window.scrollY;
+          render(text, currentFileName);
+          window.scrollTo(0, scrollY);
+          toast(t('status-refreshed'), 'ok');
+        }
+      } catch (e) {
+        // handle 失效（文件被删除/权限被收回）
+        stopAutoRefresh();
+        currentHandle = null;
+        currentFile = null;
+      }
+    }, 3000);
+  } else if (currentFile) {
+    // Fallback: 传统 File API（编辑器原子写入会失败）
     autoRefreshInterval = setInterval(function () {
-      // 本地文件：重新读取文本，比较内容
       var reader = new FileReader();
       reader.onload = function () {
         if (reader.result !== currentRaw) {
@@ -307,17 +503,18 @@ function startAutoRefresh() {
           render(reader.result, currentFileName);
           window.scrollTo(0, scrollY);
           toast(t('status-refreshed'), 'ok');
-          // 更新 currentFile.lastModified 标记
-          lastMod = currentFile.lastModified;
         }
       };
-      reader.onerror = function () { /* 文件可能不可读，忽略 */ };
+      reader.onerror = function () {
+        stopAutoRefresh();
+        currentFile = null;
+      };
       reader.readAsText(currentFile);
     }, 3000);
   } else if (currentUrl) {
     autoRefreshInterval = setInterval(async function () {
       try {
-        var resp = await fetch(currentUrl);
+        var resp = await fetch(currentUrl, { cache: 'no-store' });
         if (!resp.ok) return;
         var text = await resp.text();
         if (text !== currentRaw) {
@@ -350,8 +547,68 @@ function toggleAutoRefresh() {
 }
 
 function ensureAutoRefresh() {
-  if (autoRefreshOn && (currentFile || currentUrl)) {
+  if (autoRefreshOn && (currentHandle || currentFile || currentUrl)) {
     startAutoRefresh();
+  }
+}
+
+function manualRefresh() {
+  if (!currentHandle && !currentFile && !currentUrl) {
+    toast(t('reload-no-content'), 'warn');
+    return;
+  }
+  toast(t('reload-loading'), 'info');
+  if (currentHandle) {
+    // File System Access API — 根治方案
+    currentHandle.getFile().then(function (file) {
+      return file.text();
+    }).then(function (text) {
+      if (text !== currentRaw) {
+        var scrollY = window.scrollY;
+        render(text, currentFileName);
+        window.scrollTo(0, scrollY);
+        toast(t('reload-ok'), 'ok');
+      } else {
+        toast(t('reload-unchanged'), 'info');
+      }
+    }).catch(function () {
+      toast(t('reload-error'), 'error');
+    });
+  } else if (currentFile) {
+    // Fallback: 传统 File API
+    var reader = new FileReader();
+    reader.onload = function () {
+      if (reader.result !== currentRaw) {
+        var scrollY = window.scrollY;
+        render(reader.result, currentFileName);
+        window.scrollTo(0, scrollY);
+        toast(t('reload-ok'), 'ok');
+      } else {
+        toast(t('reload-unchanged'), 'info');
+      }
+    };
+    reader.onerror = function () {
+      stopAutoRefresh();
+      currentFile = null;
+      toast(t('reload-replaced'), 'error', 4000);
+    };
+    reader.readAsText(currentFile);
+  } else if (currentUrl) {
+    fetch(currentUrl, { cache: 'no-store' }).then(function (resp) {
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      return resp.text();
+    }).then(function (text) {
+      if (text !== currentRaw) {
+        var scrollY = window.scrollY;
+        render(text, currentFileName);
+        window.scrollTo(0, scrollY);
+        toast(t('reload-ok'), 'ok');
+      } else {
+        toast(t('reload-unchanged'), 'info');
+      }
+    }).catch(function (err) {
+      toast(t('reload-error'), 'error');
+    });
   }
 }
 
@@ -473,6 +730,7 @@ async function loadFromHash() {
   }
   currentFileName = '';
   currentFile = null;
+  currentHandle = null;
   currentUrl = null;
   render(decoded, t('share-title'));
   return true;
@@ -489,19 +747,92 @@ async function copyShareLink() {
     return;
   }
   var url = location.origin + location.pathname + '#s=' + encoded;
-  // 超长警告
   if (url.length > 4000) {
     toast(t('share-too-large'), 'warn');
   }
   try {
+    await ensureQrLib();
+    showShareDialog(url, currentFileName, encoded.length);
+  } catch (e) {
+    // QR lib failed to load — fallback to direct copy
     if (await copyTextFallback(url)) {
       toast(t('share-copied'), 'ok');
     } else {
       toast(t('share-error'), 'warn');
     }
-  } catch (e) {
-    toast(t('share-error'), 'warn');
   }
+}
+
+// ——— Share dialog (QR code) ———
+var qrLibReady = false;
+
+function ensureQrLib() {
+  return new Promise(function (resolve, reject) {
+    if (qrLibReady) return resolve();
+    if (typeof qrcode !== 'undefined') { qrLibReady = true; return resolve(); }
+    var script = document.createElement('script');
+    script.src = '/assets/qrcode.min.js';
+    script.onload = function () { qrLibReady = true; resolve(); };
+    script.onerror = function () { reject(new Error('qrcode load failed')); };
+    document.head.appendChild(script);
+  });
+}
+
+function showShareDialog(url, filename, compressedLen) {
+  var overlay = document.getElementById('shareOverlay');
+  var qrEl = document.getElementById('shareQr');
+  var metaEl = document.getElementById('shareMeta');
+  var copyBtn = document.getElementById('shareCopyBtn');
+
+  // Generate QR code
+  var typeNumber = 0; // auto
+  var qr = qrcode(typeNumber, 'M');
+  qr.addData(url);
+  qr.make();
+  qrEl.innerHTML = qr.createSvgTag(5, 1);
+
+  // Meta info
+  metaEl.innerHTML =
+    '<span>' + escapeHtml(t('share-dialog-size')) + ': ' + escapeHtml(filename || '—') + '</span>' +
+    '<span>' + escapeHtml(t('share-dialog-chars')) + ': ' + compressedLen + ' chars</span>';
+
+  // Reset copy button
+  copyBtn.textContent = t('share-dialog-copy');
+  copyBtn.disabled = false;
+
+  // Show overlay
+  overlay.hidden = false;
+  requestAnimationFrame(function () { overlay.classList.add('open'); });
+
+  // Copy button handler (replace to avoid duplicate listeners)
+  copyBtn.onclick = async function () {
+    if (await copyTextFallback(url)) {
+      copyBtn.textContent = t('share-dialog-copied');
+      copyBtn.disabled = true;
+    }
+  };
+}
+
+function hideShareDialog() {
+  var overlay = document.getElementById('shareOverlay');
+  overlay.classList.remove('open');
+  setTimeout(function () { overlay.hidden = true; }, 250);
+}
+
+// Wire up dialog close events
+function initShareDialog() {
+  var overlay = document.getElementById('shareOverlay');
+  var closeBtn = document.getElementById('shareClose');
+
+  closeBtn.addEventListener('click', hideShareDialog);
+  overlay.addEventListener('click', function (e) {
+    if (e.target === overlay) hideShareDialog();
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && !overlay.hidden && overlay.classList.contains('open')) {
+      hideShareDialog();
+    }
+  });
 }
 
 // ——— Helpers ———
@@ -644,9 +975,19 @@ async function initFeatures() {
   loadAutoRefreshPref();
   updateRefreshButton();
 
+  // 不支持 File System Access API → 历史记录和手动刷新都不可靠，隐藏
+  if (!hasFSA) {
+    if (btnReload) btnReload.hidden = true;
+    if (historyPanel) historyPanel.hidden = true;
+  }
+
   // Wire up new toolbar buttons
+  if (btnReload) btnReload.addEventListener('click', manualRefresh);
   if (btnRefresh) btnRefresh.addEventListener('click', toggleAutoRefresh);
   if (btnShare) btnShare.addEventListener('click', copyShareLink);
+
+  // Wire up share dialog
+  initShareDialog();
 
   // Load shared content from hash first (before demo)
   var loadedFromHash = await loadFromHash();
