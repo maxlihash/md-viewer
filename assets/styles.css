@@ -68,6 +68,40 @@ nav a { color: var(--muted); font-size: 14px; }
 .url-bar input::placeholder { color: var(--muted); font-size: 13px; }
 #status { font-size: 13px; color: var(--muted); margin-top: 10px; min-height: 20px; }
 
+/* ——— 历史面板 ——— */
+.history-panel { margin-top: 16px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--panel); }
+.history-panel summary {
+  cursor: pointer; font-size: 13px; font-weight: 600; color: var(--muted);
+  padding: 10px 16px; user-select: none; list-style: none;
+}
+.history-panel summary::-webkit-details-marker { display: none; }
+.history-panel summary::marker { display: none; content: ""; }
+.history-panel summary::before { content: "📂 "; }
+.history-list { list-style: none; margin: 0; padding: 0 6px 6px; }
+.history-empty { font-size: 13px; color: var(--muted); padding: 8px 16px 14px; margin: 0; display: none; }
+
+.history-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 10px; border-radius: 8px; transition: background .12s;
+  font-size: 13px;
+}
+.history-item:hover { background: var(--panel-2); }
+.hi-icon { flex-shrink: 0; font-size: 14px; }
+.hi-name {
+  flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  color: var(--txt); font-weight: 500;
+}
+.hi-time { flex-shrink: 0; color: var(--muted); font-size: 12px; white-space: nowrap; }
+.hi-action { flex-shrink: 0; font-size: 11px !important; padding: 3px 10px !important; }
+
+/* ——— 刷新按钮状态指示 ——— */
+#btnRefresh { position: relative; padding-right: 10px; }
+#btnRefresh::before {
+  content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+  margin-right: 4px; vertical-align: middle; background: #999; transition: background .2s;
+}
+#btnRefresh.refresh-on::before { background: #22c55e; }
+
 /* ——— 按钮 ——— */
 .btn {
   border: 1px solid var(--border); background: var(--bg);
@@ -166,6 +200,9 @@ footer.site p { font-size: 13px; color: var(--muted); margin: 0; text-align: cen
   .tbar-actions .btn.small { padding: 4px 10px; font-size: 11px; }
   .url-bar { flex-direction: column; gap: 8px; padding: 8px; }
   .url-bar input { padding: 8px 10px; background: var(--panel); border-radius: 8px; }
+  .history-panel summary { font-size: 12px; padding: 8px 12px; }
+  .history-item { font-size: 12px; padding: 6px 8px; gap: 6px; }
+  .hi-time { display: none; }
   .doc { padding: 20px 16px; }
   .doc h1 { font-size: 22px; }
   .how-grid { grid-template-columns: 1fr; }
@@ -181,6 +218,7 @@ footer.site p { font-size: 13px; color: var(--muted); margin: 0; text-align: cen
   }
   header.site { background: rgba(22,24,28,0.9); }
   .dropzone:hover, .dropzone.dragover, .btn.ghost:hover { background: #1d2740; }
+  #btnRefresh.refresh-on::before { background: #3ecf6e; }
   .meta { color: var(--muted); }
 }
 

@@ -1,5 +1,6 @@
 // MD 阅读器 — 核心逻辑
 // 纯前端：本地文件读取、链接导入、Markdown 渲染、导出、添加到桌面
+// Features: File History, Auto-Refresh, Shareable Link
 
 const dropzone = document.getElementById('dropzone');
 const fileInput = document.getElementById('fileInput');
@@ -10,10 +11,19 @@ const viewer = document.getElementById('viewer');
 const mdBody = document.getElementById('mdBody');
 const mdRaw = document.getElementById('mdRaw');
 const tbTitle = document.getElementById('tbTitle');
+const btnRefresh = document.getElementById('btnRefresh');
+const btnShare = document.getElementById('btnShare');
+const historyPanel = document.getElementById('historyPanel');
+const historyList = document.getElementById('historyList');
+const historyEmpty = document.getElementById('historyEmpty');
 
 let currentFileName = '';
 let currentRaw = '';
+let currentFile = null;       // File 对象引用（本地文件自动刷新用）
+let currentUrl = null;        // URL 字符串（URL 自动刷新用）
 let showingRaw = false;
+let autoRefreshOn = true;     // 默认开启
+let autoRefreshInterval = null;
 
 // ——— Configure marked ———
 if (typeof marked !== 'undefined') {
@@ -46,11 +56,15 @@ function loadFile(file) {
     return;
   }
   currentFileName = file.name;
+  currentFile = file;
+  currentUrl = null;
   showStatus(t('status-reading'), '');
   const reader = new FileReader();
   reader.onload = () => {
     render(reader.result, file.name);
     showStatus(t('status-ok-local'), 'ok');
+    addHistory({ type: 'file', name: file.name, time: Date.now(), snippet: snippet(reader.result) });
+    ensureAutoRefresh();
   };
   reader.onerror = () => showStatus(t('status-read-error'), 'error');
   reader.readAsText(file);
@@ -72,8 +86,12 @@ async function loadFromURL() {
     const text = await resp.text();
     const name = url.split('/').pop() || 'markdown';
     currentFileName = name;
+    currentFile = null;
+    currentUrl = url;
     render(text, name);
     showStatus(t('status-ok-url'), 'ok');
+    addHistory({ type: 'url', name: name, url: url, time: Date.now(), snippet: snippet(text) });
+    ensureAutoRefresh();
   } catch (err) {
     showStatus(t('status-fetch-error').replace('{0}', err.message), 'error');
   }
@@ -96,11 +114,15 @@ window.render = function render(raw, fileName) {
   tbTitle.textContent = fileName || '—';
   viewer.style.display = 'block';
   updateBtnLabels();
-  viewer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (!autoRefreshInterval) {
+    // Only scroll on initial render, not on auto-refresh
+    viewer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
 };
 
 function updateBtnLabels() {
   document.getElementById('btnRaw').textContent = showingRaw ? t('toolbar-rendered') : t('toolbar-source');
+  updateRefreshButton();
 }
 
 // ——— Toolbar actions ———
@@ -136,6 +158,270 @@ document.getElementById('btnRaw').addEventListener('click', () => {
   }
   updateBtnLabels();
 });
+
+// ══════════════════════════════════════════
+// Feature 1: 文件历史 (File History)
+// ══════════════════════════════════════════
+
+function addHistory(entry) {
+  const history = loadHistory();
+  // URL 型：同名 URL 不重复，更新 time + snippet
+  if (entry.type === 'url' && entry.url) {
+    const idx = history.findIndex(h => h.type === 'url' && h.url === entry.url);
+    if (idx >= 0) {
+      history[idx].time = entry.time;
+      history[idx].snippet = entry.snippet;
+      // Move to top
+      const item = history.splice(idx, 1)[0];
+      history.unshift(item);
+    } else {
+      history.unshift(entry);
+    }
+  } else {
+    // 本地文件：直接插入，同名允许多条
+    history.unshift(entry);
+  }
+  // 最多 20 条，FIFO 淘汰
+  const trimmed = history.slice(0, 20);
+  try {
+    localStorage.setItem('mdreader_history', JSON.stringify(trimmed));
+  } catch { /* localStorage full, ignore */ }
+  renderHistory();
+}
+
+function loadHistory() {
+  try {
+    return JSON.parse(localStorage.getItem('mdreader_history') || '[]');
+  } catch { return []; }
+}
+
+function renderHistory() {
+  const history = loadHistory();
+  historyList.innerHTML = '';
+  if (history.length === 0) {
+    historyEmpty.style.display = 'block';
+    return;
+  }
+  historyEmpty.style.display = 'none';
+  history.forEach((entry, i) => {
+    const li = document.createElement('li');
+    li.className = 'history-item';
+    const icon = entry.type === 'url' ? '🔗' : '📄';
+    const time = formatTime(entry.time);
+    const actionLabel = entry.type === 'url' ? t('history-reopen') : t('history-reselect');
+    const name = escapeHtml(entry.name);
+    let tooltip = '';
+    if (entry.type === 'url' && entry.url) {
+      tooltip = escapeHtml(entry.url);
+    } else if (entry.snippet) {
+      tooltip = escapeHtml(entry.snippet);
+    }
+    li.innerHTML =
+      `<span class="hi-icon">${icon}</span>` +
+      `<span class="hi-name" title="${tooltip}">${name}</span>` +
+      `<span class="hi-time">${time}</span>` +
+      `<button class="btn small hi-action" data-idx="${i}">${actionLabel}</button>`;
+    // Click row to re-open (URL only)
+    if (entry.type === 'url') {
+      li.style.cursor = 'pointer';
+      li.addEventListener('click', () => {
+        urlInput.value = entry.url;
+        loadFromURL();
+      });
+    }
+    historyList.appendChild(li);
+  });
+
+  // Wire up action buttons (stopPropagation to avoid row click)
+  historyList.querySelectorAll('.hi-action').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const idx = parseInt(btn.dataset.idx);
+      const h = loadHistory();
+      const entry = h[idx];
+      if (!entry) return;
+      if (entry.type === 'url' && entry.url) {
+        urlInput.value = entry.url;
+        loadFromURL();
+      } else {
+        // 本地文件：无法自动重新加载，打开文件选择器
+        fileInput.click();
+      }
+    });
+  });
+}
+
+function formatTime(ts) {
+  const d = new Date(ts);
+  const now = new Date();
+  const isToday = d.toDateString() === now.toDateString();
+  const hh = String(d.getHours()).padStart(2, '0');
+  const mm = String(d.getMinutes()).padStart(2, '0');
+  if (isToday) return hh + ':' + mm;
+  const M = d.getMonth() + 1;
+  const D = d.getDate();
+  return M + '/' + D + ' ' + hh + ':' + mm;
+}
+
+function snippet(text, maxLen) {
+  maxLen = maxLen || 100;
+  const s = text.replace(/\n+/g, ' ').trim();
+  return s.length > maxLen ? s.slice(0, maxLen) + '…' : s;
+}
+
+// ══════════════════════════════════════════
+// Feature 2: 自动刷新 (Auto-Refresh)
+// ══════════════════════════════════════════
+
+function loadAutoRefreshPref() {
+  try {
+    const v = localStorage.getItem('mdreader_autorefresh');
+    if (v === 'false') autoRefreshOn = false;
+    else if (v === 'true') autoRefreshOn = true;
+  } catch { autoRefreshOn = true; }
+}
+
+function saveAutoRefreshPref() {
+  try {
+    localStorage.setItem('mdreader_autorefresh', String(autoRefreshOn));
+  } catch { /* ignore */ }
+}
+
+function startAutoRefresh() {
+  stopAutoRefresh();
+  if (currentFile) {
+    var lastMod = currentFile.lastModified;
+    autoRefreshInterval = setInterval(function () {
+      // 本地文件：重新读取文本，比较内容
+      var reader = new FileReader();
+      reader.onload = function () {
+        if (reader.result !== currentRaw) {
+          var scrollY = window.scrollY;
+          render(reader.result, currentFileName);
+          window.scrollTo(0, scrollY);
+          showStatus(t('status-refreshed'), 'ok');
+          setTimeout(function () { showStatus('', ''); }, 2000);
+          // 更新 currentFile.lastModified 标记
+          lastMod = currentFile.lastModified;
+        }
+      };
+      reader.onerror = function () { /* 文件可能不可读，忽略 */ };
+      reader.readAsText(currentFile);
+    }, 3000);
+  } else if (currentUrl) {
+    autoRefreshInterval = setInterval(async function () {
+      try {
+        var resp = await fetch(currentUrl);
+        if (!resp.ok) return;
+        var text = await resp.text();
+        if (text !== currentRaw) {
+          var scrollY = window.scrollY;
+          render(text, currentFileName);
+          window.scrollTo(0, scrollY);
+          showStatus(t('status-refreshed'), 'ok');
+          setTimeout(function () { showStatus('', ''); }, 2000);
+        }
+      } catch (e) { /* 网络错误，静默忽略 */ }
+    }, 10000);
+  }
+}
+
+function stopAutoRefresh() {
+  if (autoRefreshInterval) {
+    clearInterval(autoRefreshInterval);
+    autoRefreshInterval = null;
+  }
+}
+
+function toggleAutoRefresh() {
+  autoRefreshOn = !autoRefreshOn;
+  saveAutoRefreshPref();
+  updateRefreshButton();
+  if (autoRefreshOn) {
+    ensureAutoRefresh();
+  } else {
+    stopAutoRefresh();
+  }
+}
+
+function ensureAutoRefresh() {
+  if (autoRefreshOn && (currentFile || currentUrl)) {
+    startAutoRefresh();
+  }
+}
+
+function updateRefreshButton() {
+  if (!btnRefresh) return;
+  btnRefresh.textContent = autoRefreshOn ? t('refresh-on') : t('refresh-off');
+  btnRefresh.className = 'btn small' + (autoRefreshOn ? ' refresh-on' : '');
+}
+
+// ══════════════════════════════════════════
+// Feature 3: 可分享链接 (Shareable Link)
+// ══════════════════════════════════════════
+
+function encodeShare(raw) {
+  if (typeof LZString === 'undefined') return null;
+  try {
+    return LZString.compressToEncodedURIComponent(raw);
+  } catch (e) { return null; }
+}
+
+function decodeShare(encoded) {
+  if (typeof LZString === 'undefined') return null;
+  try {
+    var decoded = LZString.decompressFromEncodedURIComponent(encoded);
+    // LZ-String returns empty string (not null) for invalid input
+    if (!decoded && encoded.length > 0) return null;
+    return decoded;
+  } catch (e) { return null; }
+}
+
+function loadFromHash() {
+  var hash = location.hash;
+  if (!hash || !hash.startsWith('#s=')) return false;
+  var encoded = hash.slice(3);
+  if (!encoded) return false;
+  var decoded = decodeShare(encoded);
+  if (decoded === null || decoded === '') {
+    showStatus(t('share-decode-error'), 'error');
+    return true; // 尝试了解码但失败了
+  }
+  currentFileName = '';
+  currentFile = null;
+  currentUrl = null;
+  render(decoded, t('share-title'));
+  showStatus('', '');
+  return true;
+}
+
+async function copyShareLink() {
+  if (!currentRaw) {
+    showStatus(t('share-no-content'), 'warning');
+    return;
+  }
+  var encoded = encodeShare(currentRaw);
+  if (!encoded) {
+    showStatus(t('share-error'), 'warning');
+    return;
+  }
+  var url = location.origin + location.pathname + '#s=' + encoded;
+  // 超长警告
+  if (url.length > 4000) {
+    showStatus(t('share-too-large'), 'warning');
+  }
+  try {
+    await navigator.clipboard.writeText(url);
+    showStatus(t('share-copied'), 'ok');
+    setTimeout(function () {
+      if (statusEl.textContent === t('share-copied')) {
+        showStatus('', '');
+      }
+    }, 3000);
+  } catch (e) {
+    showStatus(t('share-error'), 'warning');
+  }
+}
 
 // ——— Helpers ———
 function showStatus(msg, cls) {
@@ -227,15 +513,42 @@ function buildDemo() {
     '[' + t('demo-link-gfm') + '](https://github.github.com/gfm/)\n';
 }
 
-if (new URLSearchParams(location.search).has('demo')) {
-  // Wait for i18n to be ready, then render
-  function showDemo() {
-    render(buildDemo(), 'demo.md');
-    showStatus(t('status-demo'), 'ok');
+function showDemo() {
+  render(buildDemo(), 'demo.md');
+  showStatus(t('status-demo'), 'ok');
+  addHistory({ type: 'url', name: 'demo.md', url: location.origin + location.pathname + '?demo', time: Date.now(), snippet: t('demo-h1') });
+}
+
+// ══════════════════════════════════════════
+// 初始化
+// ══════════════════════════════════════════
+
+function initFeatures() {
+  loadAutoRefreshPref();
+  updateRefreshButton();
+
+  // Wire up new toolbar buttons
+  if (btnRefresh) btnRefresh.addEventListener('click', toggleAutoRefresh);
+  if (btnShare) btnShare.addEventListener('click', copyShareLink);
+
+  // Load shared content from hash first (before demo)
+  var loadedFromHash = loadFromHash();
+
+  // Load demo if ?demo and no hash content
+  if (!loadedFromHash && new URLSearchParams(location.search).has('demo')) {
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', showDemo);
+    } else {
+      showDemo();
+    }
   }
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', showDemo);
-  } else {
-    showDemo();
-  }
+
+  // Render history panel
+  renderHistory();
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initFeatures);
+} else {
+  initFeatures();
 }

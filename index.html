@@ -85,14 +85,22 @@
       </div>
 
       <div id="status"></div>
+
+      <details class="history-panel" id="historyPanel">
+        <summary data-i18n="history-title">Recent</summary>
+        <ul class="history-list" id="historyList"></ul>
+        <p class="history-empty" id="historyEmpty" data-i18n="history-empty">No history</p>
+      </details>
     </section>
 
     <section class="viewer" id="viewer" style="display:none">
       <div class="toolbar" id="toolbar">
         <span class="tbar-title" id="tbTitle">—</span>
         <div class="tbar-actions">
+          <button class="btn small" id="btnRefresh" data-i18n="refresh-on" title="">Auto</button>
           <button class="btn small" id="btnRaw" data-i18n="toolbar-source">View Source</button>
           <button class="btn small" id="btnCopy" data-i18n="toolbar-copy">Copy</button>
+          <button class="btn small" id="btnShare" data-i18n="share-copy">Copy Link</button>
           <button class="btn small" id="btnPrint" data-i18n="toolbar-pdf">Print PDF</button>
           <button class="btn small" id="btnDownload" data-i18n="toolbar-save">Save .html</button>
         </div>
@@ -111,6 +119,7 @@
   <link rel="stylesheet" href="/assets/styles.css" media="print" onload="this.onload=null;this.media='all'">
 
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.min.js"></script>
   <script src="/assets/app.js"></script>
   <script>
     if ('serviceWorker' in navigator) {

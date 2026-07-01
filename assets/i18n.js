@@ -44,6 +44,26 @@ window.I18N = {
     'status-copied-rich': '📋 已复制（带格式，可直接粘贴到微信/飞书/Word）。',
     'status-copied-plain': '📋 已复制为纯文本。',
     'status-demo': '✅ 示例已载入。把你自己的 .md 文件拖进来试试。',
+    'status-refreshed': '🔄 内容已自动更新',
+
+    // history
+    'history-title': '最近打开',
+    'history-empty': '暂无打开记录',
+    'history-reopen': '重新打开',
+    'history-reselect': '重新选择',
+
+    // auto-refresh
+    'refresh-on': 'Auto',
+    'refresh-off': 'Auto',
+
+    // share link
+    'share-copy': '复制链接',
+    'share-copied': '✅ 链接已复制！',
+    'share-too-large': '⚠️ 内容过长，链接可能被截断',
+    'share-title': '分享内容',
+    'share-decode-error': '⚠️ 无法解析分享链接',
+    'share-no-content': '请先打开一个文件',
+    'share-error': '生成链接失败',
 
     // demo content
     'demo-h1': 'Markdown 示例',
@@ -131,7 +151,7 @@ window.I18N = {
     'privacy-h2-host': '托管方可能记录的',
     'privacy-host': '本站托管在 Cloudflare Pages，Cloudflare 作为基础设施可能记录匿名访问数据（如请求数、带宽），这是所有托管在 Cloudflare 上的网站的通用情况。详见 <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener">Cloudflare 隐私政策</a>。',
     'privacy-h2-cdn': '第三方 CDN',
-    'privacy-cdn': '本站从 jsDelivr（<code>cdn.jsdelivr.net</code>）加载 <code>marked.js</code>，jsDelivr 可能按其隐私政策记录匿名请求数据。详见 <a href="https://www.jsdelivr.com/terms/privacy-policy" target="_blank" rel="noopener">jsDelivr 隐私政策</a>。',
+    'privacy-cdn': '本站从 jsDelivr（<code>cdn.jsdelivr.net</code>）加载 <code>marked.js</code> 和 <code>lz-string</code>，jsDelivr 可能按其隐私政策记录匿名请求数据。详见 <a href="https://www.jsdelivr.com/terms/privacy-policy" target="_blank" rel="noopener">jsDelivr 隐私政策</a>。',
     'privacy-h2-contact': '联系',
     'privacy-contact': '有问题可邮件 <a href="mailto:hello@mdreader.xyz">hello@mdreader.xyz</a>。',
     'privacy-back': '← 回首页',
@@ -190,6 +210,26 @@ window.I18N = {
     'status-copied-rich': '📋 Copied (rich text — paste into Word, email, etc.).',
     'status-copied-plain': '📋 Copied as plain text.',
     'status-demo': '✅ Demo loaded. Drop your own .md file to try it out.',
+    'status-refreshed': '🔄 Content auto-refreshed',
+
+    // history
+    'history-title': 'Recent',
+    'history-empty': 'No history',
+    'history-reopen': 'Reopen',
+    'history-reselect': 'Reselect',
+
+    // auto-refresh
+    'refresh-on': 'Auto',
+    'refresh-off': 'Auto',
+
+    // share link
+    'share-copy': 'Copy Link',
+    'share-copied': '✅ Link copied!',
+    'share-too-large': '⚠️ Content too long, link may be truncated',
+    'share-title': 'Shared content',
+    'share-decode-error': '⚠️ Cannot decode share link',
+    'share-no-content': 'Open a file first',
+    'share-error': 'Failed to generate link',
 
     // demo content
     'demo-h1': 'Markdown Demo',
@@ -277,7 +317,7 @@ window.I18N = {
     'privacy-h2-host': 'What our host may log',
     'privacy-host': 'This site is hosted on Cloudflare Pages. Cloudflare may log anonymous infrastructure data (e.g. request counts, bandwidth). This is standard for any site hosted on Cloudflare. See <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener">Cloudflare\'s Privacy Policy</a>.',
     'privacy-h2-cdn': 'Third-party CDN',
-    'privacy-cdn': 'We load <code>marked.js</code> from jsDelivr (<code>cdn.jsdelivr.net</code>). jsDelivr may log anonymous request data per their privacy policy. See <a href="https://www.jsdelivr.com/terms/privacy-policy" target="_blank" rel="noopener">jsDelivr Privacy Policy</a>.',
+    'privacy-cdn': 'We load <code>marked.js</code> and <code>lz-string</code> from jsDelivr (<code>cdn.jsdelivr.net</code>). jsDelivr may log anonymous request data per their privacy policy. See <a href="https://www.jsdelivr.com/terms/privacy-policy" target="_blank" rel="noopener">jsDelivr Privacy Policy</a>.',
     'privacy-h2-contact': 'Contact',
     'privacy-contact': 'Questions? Email <a href="mailto:hello@mdreader.xyz">hello@mdreader.xyz</a>.',
     'privacy-back': '← Back home',
