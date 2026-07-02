@@ -693,29 +693,37 @@ async function deflateDecompress(encoded) {
 }
 
 async function encodeShare(raw) {
-  if (!compressionSupported()) {
-    console.error('[share] CompressionStream not supported');
-    return null;
+  // deflate-raw 优先（压缩率 ~50-60%），不支持则 raw base64url
+  if (compressionSupported()) {
+    try {
+      return 'd:' + await deflateCompress(raw);
+    } catch (e) {
+      console.error('[share] deflate error, fallback to raw:', e);
+    }
   }
-  try {
-    return await deflateCompress(raw);
-  } catch (e) {
-    console.error('[share] encode error:', e);
-    return null;
-  }
+  // Raw fallback
+  var encoder = new TextEncoder();
+  return 'r:' + base64urlFromBytes(encoder.encode(raw));
 }
 
 async function decodeShare(encoded) {
-  if (!compressionSupported()) {
-    console.error('[share] DecompressionStream not supported');
-    return null;
-  }
+  if (!encoded) return null;
   try {
-    return await deflateDecompress(encoded);
+    if (encoded.startsWith('d:')) {
+      return await deflateDecompress(encoded.slice(2));
+    }
+    if (encoded.startsWith('r:')) {
+      var buf = bytesFromBase64url(encoded.slice(2));
+      return new TextDecoder().decode(buf);
+    }
+    // 向后兼容：旧格式无前缀，默认 deflate
+    if (compressionSupported()) {
+      return await deflateDecompress(encoded);
+    }
   } catch (e) {
     console.error('[share] decode error:', e);
-    return null;
   }
+  return null;
 }
 
 async function loadFromHash() {
